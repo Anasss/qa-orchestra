@@ -1,0 +1,20 @@
+# Dependencies
+node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Agent outputs — generated per session, not committed
+qa-output/*.md
+qa-output/automation/
+qa-output/screenshots/
+!qa-output/.gitkeep
+
+# MCP secrets — fill tokens in .mcp.local.json, never commit it
+.mcp.local.json
