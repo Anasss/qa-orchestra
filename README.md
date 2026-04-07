@@ -8,10 +8,32 @@ No SaaS. No API keys beyond Claude. Works with **any stack**.
 
 ---
 
-## 30-Second Setup
+## Install
+
+### Option A: Plugin install (recommended)
 
 ```bash
-# 1. Clone into your workspace (alongside your project repos)
+# 1. Add the marketplace
+/plugin marketplace add Anasss/qa-orchestra
+
+# 2. Install the plugin
+/plugin install qa-orchestra@qa-orchestra
+```
+
+All 10 agents are now available in your project. Type `@functional-reviewer`, `@orchestrator`, etc.
+
+### Option B: Global agents (available in all projects)
+
+```bash
+# Clone and copy agents to your global directory
+git clone https://github.com/Anasss/qa-orchestra.git
+cp qa-orchestra/.claude/agents/*.md ~/.claude/agents/
+```
+
+### Option C: Clone into your workspace
+
+```bash
+# 1. Clone alongside your project repos
 git clone https://github.com/Anasss/qa-orchestra.git
 cd qa-orchestra
 
@@ -19,9 +41,17 @@ cd qa-orchestra
 cp examples/CONTEXT.example.md context/CONTEXT.md
 # Edit context/CONTEXT.md with your stack, repos, URLs, and commands
 
-# 3. Open Claude Code — agents auto-load
+# 3. Open Claude Code — agents auto-load from .claude/agents/
 claude
-# That's it. Type @functional-reviewer, @test-scenario-designer, etc.
+```
+
+### Setup (all options)
+
+After installing, create your project context:
+
+```bash
+cp examples/CONTEXT.example.md context/CONTEXT.md
+# Edit context/CONTEXT.md with your stack, repos, URLs, and commands
 ```
 
 ## What It Does
@@ -137,6 +167,9 @@ qa-output/
 
 ```
 qa-orchestra/
+├── .claude-plugin/         ← Plugin manifest (for /plugin install)
+│   ├── plugin.json
+│   └── marketplace.json
 ├── .claude/agents/         ← 10 native Claude Code agents (auto-discovered)
 │   ├── orchestrator.md
 │   ├── functional-reviewer.md

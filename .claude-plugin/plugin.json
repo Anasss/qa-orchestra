@@ -1,0 +1,24 @@
+{
+  "name": "qa-orchestra",
+  "description": "10 coordinated QA agents for Claude Code — chains diff analysis, AC compliance, test scenarios, browser validation, bug reports, and automation code generation.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Anass Rachid"
+  },
+  "homepage": "https://github.com/Anasss/qa-orchestra",
+  "repository": "https://github.com/Anasss/qa-orchestra",
+  "license": "MIT",
+  "keywords": [
+    "qa",
+    "testing",
+    "test-automation",
+    "playwright",
+    "bug-reporting",
+    "functional-review",
+    "test-scenarios",
+    "browser-validation",
+    "acceptance-criteria",
+    "multi-agent"
+  ],
+  "agents": "./.claude/agents/"
+}
