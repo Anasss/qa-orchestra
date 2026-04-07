@@ -1,6 +1,6 @@
 {
   "name": "qa-orchestra",
-  "description": "10 coordinated QA agents for Claude Code — chains diff analysis, AC compliance, test scenarios, browser validation, bug reports, and automation code generation.",
+  "description": "10 coordinated QA agents for Claude Code: chains diff analysis, AC compliance, test scenarios, browser validation, bug reports, and automation code generation.",
   "version": "1.0.0",
   "author": {
     "name": "Anass Rachid"

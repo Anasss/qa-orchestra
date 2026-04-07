@@ -8,7 +8,7 @@
     {
       "id": "qa-orchestra",
       "name": "qa-orchestra",
-      "description": "10 coordinated QA agents — functional reviewer, test scenario designer, automation writer, bug reporter, browser validator, and more. Full QA lifecycle from diff analysis to bug reports.",
+      "description": "10 coordinated QA agents: functional reviewer, test scenario designer, automation writer, bug reporter, browser validator, and more. Full QA lifecycle from diff analysis to bug reports.",
       "version": "1.0.0",
       "source": {
         "source": "github",
