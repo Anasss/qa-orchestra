@@ -284,14 +284,6 @@ Configure in `.mcp.json`. Tokens go in `.mcp.local.json` (gitignored).
 
 Agents update these files automatically. Over time, your QA context gets smarter.
 
-## Cost
-
-QA Orchestra runs **inside your Claude Code subscription**. No external API keys, no per-token billing, no SaaS fees, no cloud service.
-
-The only cost is your existing Claude plan — Pro, Max, or Enterprise, whichever you're already on. The agents use the models available to your subscription (Opus for the heavy reviewers, Sonnet for the rest), and Claude Code handles model routing automatically.
-
-If you're not yet on Claude Code, see [claude.ai/code](https://claude.ai/code).
-
 ## Why QA Orchestra?
 
 Existing tools in this space fall into two categories:
