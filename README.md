@@ -134,6 +134,23 @@ You won't reach for these every day. They exist for the full-pipeline workflow a
 | **automation-writer** | Sonnet | Converts scenarios to Playwright / Cypress / Gherkin test code |
 | **manual-validator** | Sonnet | Guides manual test execution, tracks pass/fail, produces a validation report |
 
+## Start here — pick a recipe
+
+You landed here because you have a question. Find the row that matches and run the command. Each row is a complete, standalone invocation — nothing else to set up beyond `context/CONTEXT.md`.
+
+| I want to... | Run |
+|---|---|
+| Review a PR for AC compliance | `@functional-reviewer Compare this diff against these ACs: ...` |
+| Generate test scenarios from a ticket | `@test-scenario-designer Generate scenarios for these ACs: ...` |
+| Find which of my existing tests a diff affects | `@smart-test-selector Which existing tests are affected by this diff?` |
+| Turn findings into developer-ready bug reports | `@bug-reporter Read qa-output/functional-review.md and create bug reports` |
+| Get test scenarios + runnable automation code | `@test-scenario-designer` then `@automation-writer` |
+| Validate a feature live in a real browser | `@environment-manager` then `@browser-validator` |
+| Analyze a release across multiple repos | `@release-analyzer Analyze the diff between v1.0 and HEAD across all repos` |
+| Run the full end-to-end pipeline *(experimental)* | `@orchestrator Run full pipeline for PR #42` |
+
+If your question isn't in the table, pick the Tier 1 agent whose description matches best and describe your task in plain English.
+
 ## Architecture
 
 ```
@@ -183,17 +200,7 @@ You won't reach for these every day. They exist for the full-pipeline workflow a
 @smart-test-selector Which existing tests are affected by this diff?
 ```
 
-### Common workflows
-
-| I want to... | Run |
-|---|---|
-| Review a PR for AC compliance | `@functional-reviewer` |
-| Generate test cases from a ticket | `@test-scenario-designer` |
-| Get test scenarios + automation code | `@test-scenario-designer` then `@automation-writer` |
-| Validate a feature in the browser | `@environment-manager` then `@browser-validator` |
-| Analyze a release across repos | `@release-analyzer` |
-| Find which tests a diff affects | `@smart-test-selector` |
-| Full end-to-end QA | `@orchestrator` |
+For a quick decision table of which agent to run for which question, see [Start here — pick a recipe](#start-here--pick-a-recipe) above.
 
 ## Output Chaining
 
