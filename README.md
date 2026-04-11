@@ -73,7 +73,7 @@ One agent. One question. One Markdown file you can paste into GitHub or Jira.
 **Other standalone entry points**:
 
 - `@test-scenario-designer` — generate test scenarios from acceptance criteria (happy, negative, boundary, edge)
-- `@smart-test-selector` — map a diff to your existing tests; find what to run and what's likely to break
+- `@smart-test-selector` — map a diff to your existing tests; find what to run, what may break, and where coverage is missing
 - `@bug-reporter` — turn findings into developer-ready bug reports
 
 Each runs independently. None requires the orchestrator or a prior agent to have run. See the [agent tiers below](#agents).
@@ -107,7 +107,7 @@ These four agents are the daily drivers. Each answers one question, runs indepen
 |---|---|---|
 | **functional-reviewer** | Opus | Does this diff actually implement the acceptance criteria? Where are the gaps and risks? |
 | **test-scenario-designer** | Sonnet | What test scenarios do I need to cover this AC? Happy path, negative, boundary, edge. |
-| **smart-test-selector** | Sonnet | Which of my existing tests does this diff affect? What's likely to break? |
+| **smart-test-selector** | Sonnet | Which of my existing tests does this diff affect? What's likely to break? Where are my coverage gaps? |
 | **bug-reporter** | Sonnet | Turn these findings into developer-ready bug reports. |
 
 ### Tier 2 — Live validation chain
@@ -117,7 +117,7 @@ These two agents work together to test the feature in a real browser, not just r
 | Agent | Model | What it does |
 |---|---|---|
 | **environment-manager** | Sonnet | Checks out the PR branch, starts the app locally, verifies end-to-end health before handing off |
-| **browser-validator** | Sonnet | Navigates the running app via Chrome MCP, executes test scenarios, measures timings, captures evidence |
+| **browser-validator** | Sonnet | Navigates the running app via Chrome MCP, executes test scenarios, verifies expected results, and captures evidence |
 
 **Requires**: Chrome DevTools MCP, a local dev environment, and a `context/CONTEXT.md` that describes how to start your app. See the [MCP Servers](#mcp-servers-optional) section.
 
@@ -128,8 +128,8 @@ You won't reach for these every day. They exist for the full-pipeline workflow a
 | Agent | Model | What it does |
 |---|---|---|
 | **orchestrator** | Sonnet | Routes a ticket through the full pipeline, deciding which agents to run and in what order |
-| **release-analyzer** | Opus | Multi-repo release diff analysis with cross-repo impact mapping |
-| **automation-writer** | Sonnet | Converts scenarios to Playwright / Cypress / Gherkin test code |
+| **release-analyzer** | Opus | Multi-repo release diff analysis — cross-repo impact, AC compliance gaps, and deployment risks |
+| **automation-writer** | Sonnet | Converts test scenarios into runnable test code — Playwright, Cypress, Selenium, pytest, JUnit, or Gherkin — following your project's existing patterns |
 | **manual-validator** | Sonnet | Guides manual test execution, tracks pass/fail, produces a validation report |
 
 ## Start here — pick a recipe
