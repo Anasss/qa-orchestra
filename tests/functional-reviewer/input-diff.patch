@@ -1,0 +1,46 @@
+diff --git a/src/components/Header.tsx b/src/components/Header.tsx
+index abc1234..def5678 100644
+--- a/src/components/Header.tsx
++++ b/src/components/Header.tsx
+@@ -1,5 +1,6 @@
+ import { Logo } from './Logo';
+ import { Nav } from './Nav';
++import { DarkModeToggle } from './DarkModeToggle';
+
+ export function Header() {
+   return (
+@@ -7,6 +8,7 @@ export function Header() {
+       <Logo />
+       <Nav />
++      <DarkModeToggle />
+     </header>
+   );
+ }
+diff --git a/src/components/DarkModeToggle.tsx b/src/components/DarkModeToggle.tsx
+new file mode 100644
+index 0000000..a1b2c3d
+--- /dev/null
++++ b/src/components/DarkModeToggle.tsx
+@@ -0,0 +1,24 @@
++'use client';
++import { useState } from 'react';
++
++export function DarkModeToggle() {
++  const [isDark, setIsDark] = useState(false);
++
++  const toggle = () => {
++    const next = !isDark;
++    setIsDark(next);
++    document.documentElement.classList.toggle('dark', next);
++  };
++
++  return (
++    <button
++      data-testid="dark-mode-toggle"
++      onClick={toggle}
++      aria-label="Toggle dark mode"
++    >
++      {isDark ? 'Light' : 'Dark'}
++    </button>
++  );
++}
