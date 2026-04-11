@@ -87,13 +87,33 @@ Wait for readiness indicators (log messages, port availability).
 
 ## Step 5 — Health check
 
-Verify everything is running using URLs from `context/CONTEXT.md`:
+**The goal of this step is to prove the app is usable, not that a process is listening.** A port can be open while every request returns a 500. A dev server can print "Ready" while the first compilation crashes. Your check must exercise the same path a real user takes.
 
-| Check | Command | Expected |
+### Minimum signal required for each service
+
+Use URLs from `context/CONTEXT.md`. For every service, collect all three signals:
+
+| Signal | What it proves | How to obtain it |
 |---|---|---|
-| Backend API | `curl -s <api_url>/health` | 200 OK |
-| Frontend | `curl -s <frontend_url> -o /dev/null -w '%{http_code}'` | 200 or 3xx |
-| Feature endpoint (if applicable) | `curl -s <feature_url>` | Expected response |
+| **Terminal status code** | The response chain resolves, not just the first hop. | Follow redirects with a bounded limit. Use the stack's equivalent of `curl -L --max-redirs N`. Treat exit on "too many redirects" as a hard failure, not a success. |
+| **Content assertion** | The page actually rendered — not a 500 page, not an empty shell. | Grep the response body for a marker defined in CONTEXT.md (a known heading, a known test-id, a known product/record count). A status 200 alone is not enough. |
+| **Absence of compile/runtime errors in logs** | The server isn't about to error out on the next request. | Read the dev-server log tail. Fail if it contains compilation errors, unhandled exceptions, or internal crashes — even if the HTTP response looked fine. |
+
+If any of the three is missing, the environment is **NOT READY**. Do not combine two weak signals ("port is listening + response was 3xx") into a green verdict.
+
+### Failure modes to detect, not hide
+
+These are the ways a health check can look green while the app is broken. All agents must actively probe for them:
+
+1. **Redirect loops** — a response like `307 /a → /a` looks like a "3xx" success, but no user can ever reach the content. Always follow redirects to a terminal code. Any `curl` exit indicating "max redirects exceeded" is a **fail**, not a pass.
+2. **Session-gated middleware** — if the framework's routing depends on a cookie (region, locale, auth, A/B bucket), a naive check will see the redirect and stop there. The check must persist cookies across hops (cookie jar) so the terminal response is the real one a returning user would see.
+3. **Bundler / dev-server cache crashes** — after a branch switch, the dev server's cached artifacts can be out of sync with the code, causing the first compile to crash in a way that is sticky until the cache is cleared. If the first page request produces a compile error in the logs, clearing the bundler's cache and restarting the dev server is the standard recovery. If the crash is in an experimental mode of the bundler (incremental / beta / next-gen), restarting in the stable mode is a valid fallback — record the deviation in the status file so downstream agents know.
+4. **First-compile latency masquerading as a hang** — some dev servers compile on the first request, not at boot. Distinguish "compiling" from "broken" by reading the log and waiting for a compile success line before deciding. Never conclude "broken" from a single slow request.
+5. **Process-up, page-broken** — the process is listening, the log says "Ready", but the actual user-facing URL returns 500 because a module failed to load. This is the single most common false-positive READY. The content assertion above is the defense against it.
+
+### Never declare READY from thin signals
+
+Do not combine "port is listening" + "first response was 3xx" + "no crash in the log yet" into READY. Agents tend toward optimistic interpretations of ambiguous evidence — this rule exists to counter that. If you cannot collect all three signals (terminal 200, content assertion, clean log), say NOT READY and explain which signal is missing.
 
 ## Output format
 
@@ -128,13 +148,20 @@ Save to `qa-output/environment-status.md`.
 
 ### Health Checks
 
-| Endpoint | Status | Response |
-|---|---|---|
-| /health | 200 | OK |
-| [feature endpoint] | 200 | [describe response] |
+| Endpoint | Terminal status (after following redirects) | Content assertion | Log clean? |
+|---|---|---|---|
+| /health | 200 | `"status": "ok"` found | yes |
+| [feature endpoint] | 200 | [expected marker from CONTEXT.md] found | yes |
+
+### Known Environmental Deviations (if any)
+[If the dev server was started in a non-default mode (e.g., cache cleared, experimental flag disabled), record it here so downstream agents know the environment is not identical to a fresh developer setup.]
 
 ### Ready for Testing
-**YES** — All services running, feature branch code deployed locally.
+**YES** — All three signals collected (terminal 200, content assertion passed, logs clean) for every service. Feature branch code deployed locally.
+
+*(or)*
+
+**NO** — [Which of the three signals failed, for which service, and what you tried.]
 ```
 
 ## Cleanup (after testing)
@@ -148,7 +175,9 @@ cd <repo-directory> && git checkout main
 ## Rules
 
 - **Read all commands from `context/CONTEXT.md`** — never hardcode framework-specific commands.
-- Always verify services are healthy before reporting "ready"
-- If any step fails, stop and report the failure — do not continue with a broken environment
-- If the database needs a full reset, warn the user before dropping data
-- Keep the previous branch name so it can be restored
+- **READY requires all three signals** — terminal 200 after following redirects, a content assertion on the expected page, and a clean log tail. Two out of three is NOT READY. "Port is listening" is not a signal.
+- **Treat ambiguous signals as failure, not success.** A redirect loop, an unexplained 500, or a compile error in the log must NEVER be rationalized into a green verdict. Downstream agents trust this file — a false READY poisons the entire chain.
+- If any step fails, stop and report the failure with the exact command, the exact output, and which of the three signals is missing — do not continue with a broken environment.
+- If the database needs a full reset, warn the user before dropping data.
+- Keep the previous branch name so it can be restored.
+- If you had to deviate from the stack's default startup (cleared a bundler cache, disabled an experimental flag, used a fallback mode), record the deviation in the status file. Downstream agents need to know the environment is not identical to a fresh setup.
