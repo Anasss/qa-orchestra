@@ -14,13 +14,27 @@ No SaaS. No API keys beyond Claude. Works with **any stack**.
 
 ### Option A: Plugin install (recommended)
 
-QA Orchestra is a Claude Code plugin. Install it from the **Manage Plugins** UI — this is a few clicks, not a single command:
+QA Orchestra is a Claude Code plugin. Installing it takes two steps: add the marketplace once, then install the plugin itself. You can do the install step from the CLI or from the UI — pick whichever you prefer.
+
+**Step 1 — Add the marketplace** *(one time per machine, UI only)*:
 
 1. Open **Manage Plugins** (Customize menu → **Manage plugins**).
 2. Go to the **Marketplaces** tab. In the "GitHub repo, URL, or path" field, paste `Anasss/qa-orchestra` and click **Add**.
-3. Switch to the **Plugins** tab. You'll see `qa-orchestra` listed under AVAILABLE — click **Install**.
 
-Once installed, all 10 agents are available in your project. Type `@functional-reviewer`, `@orchestrator`, and so on in any Claude Code chat.
+**Step 2 — Install the plugin** *(pick either path)*:
+
+**CLI** — in any Claude Code chat, run:
+
+```
+/plugin install qa-orchestra@qa-orchestra
+/reload-plugins
+```
+
+Claude Code will confirm with `Installed qa-orchestra. Run /reload-plugins to apply.`, and the reload step then registers the agents (you'll see a line like `Reloaded: N plugins · N skills · N agents · ...`).
+
+**UI** — in the same Manage Plugins panel, switch to the **Plugins** tab, find `qa-orchestra` under AVAILABLE, and click **Install**.
+
+Both paths do the same thing. Once installed, all 10 agents are available in your project. Type `@functional-reviewer`, `@orchestrator`, and so on in any Claude Code chat.
 
 ### Option B: Global agents (available in all projects)
 
