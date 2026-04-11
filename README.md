@@ -1,8 +1,10 @@
 # QA Orchestra
 
-**10 AI agents that turn your PR into a full QA report.** Clone, configure, test.
+**10 standalone QA agents for Claude Code.** Each one answers a specific question about your PR — *does this diff implement the AC?*, *what scenarios do I need?*, *which of my tests will break?* — and writes a Markdown report you can paste into GitHub or Jira.
 
-QA Orchestra is an open-source, multi-agent QA toolkit for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). It chains diff analysis, AC compliance checking, test scenario design, browser validation, automation code generation, and bug reporting — all from a single workspace.
+QA Orchestra is an open-source, composable agent library for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Pick one agent, run it, get an answer. Compose them only when you want to.
+
+**Two layers, working together**: the agents bring QA expertise — how to read a diff against acceptance criteria, how to design test scenarios that find real bugs, how to map a change to the tests that already exist. MCP brings the data they reason about — GitHub issues and PRs, Chrome DevTools for browser validation, Jira or GitLab if you use them. You bring `context/CONTEXT.md`, which describes your stack and conventions in one file.
 
 No SaaS. No API keys beyond Claude. Works with **any stack**.
 
@@ -276,6 +278,8 @@ A template lives at `examples/mcp.example.json` — copy it to `.mcp.local.json`
 
 `context/CONTEXT.md` is the single source of truth for your stack. Every agent reads it.
 
+**You don't need to be a developer to edit CONTEXT.md.** Your product owner can set AC format conventions, severity definitions, and terminology. Your QA lead can refine the review criteria. Your business analyst can document domain rules the agents should enforce. Every agent reads CONTEXT.md and adjusts its behavior accordingly — no code changes required. The expertise layer lives in Markdown, not in source files.
+
 `context/annotations/` accumulates project-specific learnings across sessions:
 - **services.md** — backend quirks and behaviors
 - **environments.md** — environment-specific gotchas
@@ -292,7 +296,7 @@ Existing tools in this space fall into two categories:
 
 2. **Generic agent collections** (100+ agent marketplaces) — have a single "tester" prompt. No output chaining, no orchestration, no multi-repo awareness.
 
-QA Orchestra is the first open-source tool that chains the entire QA lifecycle: **diff analysis > AC compliance > test scenarios > browser validation > bug reports > automation code**.
+QA Orchestra is the first open-source library of composable Claude Code agents covering the full QA lifecycle: **diff analysis, AC compliance, test scenarios, browser validation, bug reports, and automation code**. Each agent is standalone — use what you need, when you need it, and skip the rest.
 
 ## Contributing
 
