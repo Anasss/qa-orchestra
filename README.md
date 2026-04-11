@@ -242,11 +242,11 @@ qa-orchestra/
 │   ├── CONTEXT.md          ← Fill this in (only required setup)
 │   └── annotations/        ← Learnings agents accumulate over time
 ├── examples/               ← Example configurations
-│   └── CONTEXT.example.md
+│   ├── CONTEXT.example.md
+│   └── mcp.example.json    ← MCP server config template
 ├── qa-output/              ← Agent outputs (gitignored, generated per session)
 ├── CLAUDE.md               ← Claude Code project instructions
-├── AGENTS.md               ← Behavioral rules for all agents
-└── .mcp.json               ← MCP server config template
+└── AGENTS.md               ← Behavioral rules for all agents
 ```
 
 ## Stack-Agnostic Design
@@ -268,7 +268,9 @@ QA Orchestra integrates with MCP servers for enhanced capabilities:
 | **Jira** | Read tickets and AC | If using Jira |
 | **GitLab** | Read MRs and diffs | If using GitLab |
 
-Configure in `.mcp.json`. Tokens go in `.mcp.local.json` (gitignored).
+A template lives at `examples/mcp.example.json` — copy it to `.mcp.local.json` in your project root and fill in your tokens. `.mcp.local.json` is gitignored.
+
+> **Don't double-configure.** If you've already installed the `chrome-devtools-mcp` or `github` plugins from Claude Code's official marketplace, do NOT also declare those servers in your own `.mcp.local.json` — Claude Code will log a "server skipped — same command/URL as already-configured" warning on startup, and one of the two declarations silently won't work. Keep each MCP server declared exactly once across your whole setup.
 
 ## Living Context
 
