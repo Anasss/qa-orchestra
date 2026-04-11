@@ -120,7 +120,10 @@ Every agent writes to `qa-output/`. The next agent reads from there. No copy-pas
 
 ### Individual agents
 
+**Every agent is a legitimate standalone entry point.** You don't need the orchestrator, a full pipeline, or any upstream agent to call one — just invoke the agent that matches your current question. Each agent declares its inputs (from `qa-output/` or from you) and its output file in the agent map (see [CLAUDE.md](CLAUDE.md#agent-map)), so the contract is explicit.
+
 ```
+@environment-manager Checkout feature/ISSUE-1 and start the app
 @functional-reviewer Compare this diff against these ACs: [paste AC]
 @test-scenario-designer Generate scenarios for: [paste AC]
 @automation-writer Read qa-output/test-scenarios.md and generate Playwright tests
