@@ -1,12 +1,12 @@
 # QA Orchestra
 
-**10 standalone QA agents for Claude Code.** Each one answers a specific question about your PR — *does this diff implement the AC?*, *what scenarios do I need?*, *which of my tests will break?* — and writes a Markdown report you can paste into GitHub or Jira.
+**10 standalone QA agents for [Claude Code](https://docs.anthropic.com/en/docs/claude-code).** Each one answers a specific question about your PR — *does this diff implement the AC?*, *what scenarios do I need?*, *which of my tests will break?* — and writes a Markdown report you can paste into GitHub or Jira.
 
-QA Orchestra is an open-source, composable agent library for [Claude Code](https://docs.anthropic.com/en/docs/claude-code). Pick one agent, run it, get an answer. Compose them only when you want to.
-
-**Two layers, working together**: the agents bring QA expertise — how to read a diff against acceptance criteria, how to design test scenarios that find real bugs, how to map a change to the tests that already exist. MCP brings the data they reason about — GitHub issues and PRs, Chrome DevTools for browser validation, Jira or GitLab if you use them. You bring `context/CONTEXT.md`, which describes your stack and conventions in one file.
+**Two layers**: the agents bring QA expertise (diff vs AC analysis, scenario design, test selection). MCP brings the data (GitHub, Chrome DevTools, Jira, GitLab). Your `context/CONTEXT.md` describes your stack in one file.
 
 No SaaS. No API keys beyond Claude. Works with **any stack**.
+
+![QA Orchestra — 10 composable QA agents for Claude Code. Context sources on the left feed into the 10 agents in the center, producing structured Markdown QA outputs on the right. Each agent is standalone and writes to qa-output.](docs/images/qa-orchestra-overview.svg)
 
 ---
 
@@ -36,6 +36,13 @@ Claude Code will confirm with `Installed qa-orchestra. Run /reload-plugins to ap
 
 Both paths do the same thing. Once installed, all 10 agents are available in your project. Type `@functional-reviewer`, `@orchestrator`, and so on in any Claude Code chat.
 
+<details>
+<summary>What the install looks like in Claude Code</summary>
+
+![QA Orchestra plugin install](docs/images/install-screenshot.png)
+
+</details>
+
 ### Option B: Global agents (available in all projects)
 
 ```bash
@@ -57,15 +64,6 @@ cp examples/CONTEXT.example.md context/CONTEXT.md
 
 # 3. Open Claude Code — agents auto-load from .claude/agents/
 claude
-```
-
-### Setup (all options)
-
-After installing, create your project context:
-
-```bash
-cp examples/CONTEXT.example.md context/CONTEXT.md
-# Edit context/CONTEXT.md with your stack, repos, URLs, and commands
 ```
 
 ## What It Does
@@ -92,24 +90,11 @@ One agent. One question. One Markdown file you can paste into GitHub or Jira.
 - `@smart-test-selector` — map a diff to your existing tests; find what to run, what may break, and where coverage is missing
 - `@bug-reporter` — turn findings into developer-ready bug reports
 
-Each runs independently. None requires the orchestrator or a prior agent to have run. See the [agent tiers below](#agents).
-
-### Full pipeline (optional)
-
-If you want the full chain — branch checkout → live browser validation → automation code — `@orchestrator` routes the sequence. The pipeline is powerful but has more moving parts. **If you're starting out, run one agent at a time.** Most users never touch the orchestrator.
+Each runs independently. None requires the orchestrator or a prior agent. For the full pipeline (`@orchestrator`), see the recipe table below — most users never need it.
 
 Every agent writes to `qa-output/`. The next agent reads from there. No copy-pasting between agents.
 
-### What QA Orchestra does NOT do
-
-QA Orchestra is focused on **functional correctness against acceptance criteria**. It is not a general-purpose AI review tool. It does NOT do:
-
-- **Code quality review, linting, or style feedback** — use CodeRabbit, Qodo, or Copilot for that
-- **Security scanning, SAST/DAST, or dependency audits**
-- **Performance profiling, load testing, or flamegraph analysis**
-- **Unit-test generation from source code** — it generates scenarios from acceptance criteria, not tests from implementation details
-
-If your question is *"does this PR pass my tests?"* or *"is this code stylistically good?"*, QA Orchestra is the wrong tool. If your question is *"does this PR actually deliver the behavior the ticket asked for?"*, it is the right tool.
+**Not in scope**: code quality review, linting, security scanning, performance profiling, or unit-test generation. QA Orchestra is scoped to functional correctness against acceptance criteria.
 
 ## Agents
 
@@ -165,57 +150,6 @@ You landed here because you have a question. Find the row that matches and run t
 
 If your question isn't in the table, pick the Tier 1 agent whose description matches best and describe your task in plain English.
 
-## Architecture
-
-```
-                    ┌──────────────────────┐
-                    │     ORCHESTRATOR     │
-                    │      (Sonnet)        │
-                    └─────────┬────────────┘
-                              │ routes
-            ┌─────────────────┼─────────────────┐
-            v                 v                 v
-   ┌────────────────┐ ┌──────────────┐  ┌──────────────┐
-   │  FUNCTIONAL    │ │    TEST      │  │   BROWSER    │
-   │  REVIEWER      │ │  SCENARIO    │  │  VALIDATOR   │
-   │  (Opus)        │ │  DESIGNER    │  │ (Chrome MCP) │
-   └───────┬────────┘ │  (Sonnet)    │  └──────────────┘
-           │          └──────┬───────┘
-           v                 ├──────────────┐
-   ┌────────────────┐        v              v
-   │  BUG REPORTER  │ ┌──────────────┐ ┌──────────────┐
-   │  (Sonnet)      │ │  AUTOMATION  │ │   MANUAL     │
-   └────────────────┘ │  WRITER      │ │  VALIDATOR   │
-                      │  (Sonnet)    │ │  (Sonnet)    │
-                      └──────────────┘ └──────────────┘
-```
-
-## How To Use
-
-### Full QA pipeline on a PR
-
-```
-@orchestrator Run full pipeline for PR #42 on my-backend and PR #38 on my-frontend
-```
-
-### Individual agents
-
-**Every agent is a legitimate standalone entry point.** You don't need the orchestrator, a full pipeline, or any upstream agent to call one — just invoke the agent that matches your current question. Each agent declares its inputs (from `qa-output/` or from you) and its output file in the agent map (see [CLAUDE.md](CLAUDE.md#agent-map)), so the contract is explicit.
-
-```
-@environment-manager Checkout feature/ISSUE-1 and start the app
-@functional-reviewer Compare this diff against these ACs: [paste AC]
-@test-scenario-designer Generate scenarios for: [paste AC]
-@automation-writer Read qa-output/test-scenarios.md and generate Playwright tests
-@browser-validator Validate Must Test scenarios against the running app
-@bug-reporter Read qa-output/functional-review.md and create bug reports
-@manual-validator Guide me through qa-output/test-scenarios.md
-@release-analyzer Analyze the diff between v1.0 and HEAD across all repos
-@smart-test-selector Which existing tests are affected by this diff?
-```
-
-For a quick decision table of which agent to run for which question, see [Start here — pick a recipe](#start-here--pick-a-recipe) above.
-
 ## Output Chaining
 
 Each agent writes structured Markdown to `qa-output/`. The next agent reads from there.
@@ -235,43 +169,6 @@ qa-output/
     ├── feature.spec.ts
     └── pages/feature.page.ts
 ```
-
-## Project Structure
-
-```
-qa-orchestra/
-├── .claude-plugin/         ← Plugin manifest (for /plugin install)
-│   ├── plugin.json
-│   └── marketplace.json
-├── .claude/agents/         ← 10 native Claude Code agents (auto-discovered)
-│   ├── orchestrator.md
-│   ├── functional-reviewer.md
-│   ├── test-scenario-designer.md
-│   ├── automation-writer.md
-│   ├── bug-reporter.md
-│   ├── manual-validator.md
-│   ├── environment-manager.md
-│   ├── browser-validator.md
-│   ├── release-analyzer.md
-│   └── smart-test-selector.md
-├── context/                ← Your project context (single source of truth)
-│   ├── CONTEXT.md          ← Fill this in (only required setup)
-│   └── annotations/        ← Learnings agents accumulate over time
-├── examples/               ← Example configurations
-│   ├── CONTEXT.example.md
-│   └── mcp.example.json    ← MCP server config template
-├── qa-output/              ← Agent outputs (gitignored, generated per session)
-├── CLAUDE.md               ← Claude Code project instructions
-└── AGENTS.md               ← Behavioral rules for all agents
-```
-
-## Stack-Agnostic Design
-
-QA Orchestra works with **any web application**. All project-specific details live in one file: `context/CONTEXT.md`.
-
-The agents read your start commands, repo paths, URLs, and conventions from CONTEXT.md — they never hardcode framework-specific details.
-
-**Works with**: React, Angular, Vue, Svelte, Next.js, Nuxt, Rails, Django, Spring Boot, Express, FastAPI, Laravel, .NET, Go — any stack with a local dev server.
 
 ## MCP Servers (Optional)
 
@@ -294,23 +191,7 @@ A template lives at `examples/mcp.example.json` — copy it to `.mcp.local.json`
 
 **You don't need to be a developer to edit CONTEXT.md.** Your product owner can set AC format conventions, severity definitions, and terminology. Your QA lead can refine the review criteria. Your business analyst can document domain rules the agents should enforce. Every agent reads CONTEXT.md and adjusts its behavior accordingly — no code changes required. The expertise layer lives in Markdown, not in source files.
 
-`context/annotations/` accumulates project-specific learnings across sessions:
-- **services.md** — backend quirks and behaviors
-- **environments.md** — environment-specific gotchas
-- **test-patterns.md** — test suite patterns
-- **domain.md** — business logic nuances
-
-Agents update these files automatically. Over time, your QA context gets smarter.
-
-## Why QA Orchestra?
-
-Existing tools in this space fall into two categories:
-
-1. **AI code review tools** (CodeRabbit, Qodo, Copilot) — focus on the PR diff. None do AC compliance, test scenario generation, or QA lifecycle orchestration.
-
-2. **Generic agent collections** (100+ agent marketplaces) — have a single "tester" prompt. No output chaining, no orchestration, no multi-repo awareness.
-
-QA Orchestra is the first open-source library of composable Claude Code agents covering the full QA lifecycle: **diff analysis, AC compliance, test scenarios, browser validation, bug reports, and automation code**. Each agent is standalone — use what you need, when you need it, and skip the rest.
+`context/annotations/` accumulates project-specific learnings across sessions — agents update these automatically so your QA context gets smarter over time.
 
 ## Contributing
 
