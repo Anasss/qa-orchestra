@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy - QA Orchestra</title>
+<meta name="description" content="QA Orchestra privacy policy. QA Orchestra is a local, open-source Claude Code plugin that collects no personal data.">
+<link rel="canonical" href="https://qa-orchestra.com/privacy">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%94%8D</text></svg>">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #080c14;
+  --bg-panel: #0d1117;
+  --bg-card: #131921;
+  --border: #1e2d3d;
+  --text: #c9d1d9;
+  --text-dim: #6e7681;
+  --text-bright: #e6edf3;
+  --accent: #22c55e;
+  --accent-bright: #4ade80;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--text-bright); line-height: 1.2; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+
+.container { max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #080c14e6;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-logo { font-size: 15px; font-weight: 600; color: var(--text-bright); }
+.nav-logo span { color: var(--accent); }
+nav a.nav-back { font-size: 14px; color: var(--text-dim); }
+nav a.nav-back:hover { color: var(--text-bright); }
+
+/* CONTENT */
+.content {
+  padding: 100px 0 80px;
+}
+
+.content h1 {
+  font-size: 28px;
+  margin-bottom: 8px;
+}
+
+.content .updated {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 48px;
+}
+
+.content h2 {
+  font-size: 20px;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.content p {
+  margin-bottom: 16px;
+  font-size: 15px;
+}
+
+.content ul {
+  margin-bottom: 16px;
+  padding-left: 24px;
+}
+
+.content li {
+  margin-bottom: 8px;
+  font-size: 15px;
+}
+
+.content strong {
+  color: var(--text-bright);
+}
+
+.summary-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 32px;
+  font-size: 15px;
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 24px 0;
+  text-align: center;
+}
+footer span {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+footer a { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><span>QA</span> Orchestra</a>
+    <a href="/" class="nav-back">&larr; Back to home</a>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <h1>Privacy Policy</h1>
+    <p class="updated">Last updated: April 14, 2026</p>
+
+    <div class="summary-box">
+      QA Orchestra is a local, open-source Claude Code plugin. It does not collect, store, or transmit any personal data.
+    </div>
+
+    <h2>Data Collection</h2>
+    <p>QA Orchestra collects <strong>no data whatsoever</strong>. Specifically:</p>
+    <ul>
+      <li><strong>No personal information</strong> is collected, stored, or processed</li>
+      <li><strong>No analytics or telemetry</strong> is sent anywhere</li>
+      <li><strong>No cookies or tracking</strong> of any kind</li>
+      <li><strong>No network requests</strong> are made by the plugin itself</li>
+      <li><strong>No user accounts</strong> are required</li>
+    </ul>
+
+    <h2>How It Works</h2>
+    <p>All processing happens locally on your machine through Claude Code. QA Orchestra consists of agent definition files (Markdown) that Claude Code reads and executes. Your code, diffs, and QA output never leave your local environment through QA Orchestra.</p>
+
+    <h2>Third-Party Services</h2>
+    <p>QA Orchestra itself makes no calls to third-party services. However:</p>
+    <ul>
+      <li><strong>Claude Code</strong> (Anthropic) processes your prompts and code according to <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a></li>
+      <li><strong>MCP servers</strong> you optionally configure (Chrome DevTools, GitHub, Jira, etc.) connect to their respective services under their own privacy policies</li>
+    </ul>
+    <p>QA Orchestra has no control over and assumes no responsibility for these third-party services.</p>
+
+    <h2>Open Source</h2>
+    <p>QA Orchestra is licensed under the <a href="https://github.com/Anasss/qa-orchestra/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>. You can audit the entire source code at <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">github.com/Anasss/qa-orchestra</a>.</p>
+
+    <h2>Contact</h2>
+    <p>For questions about this privacy policy, open an issue at <a href="https://github.com/Anasss/qa-orchestra/issues" target="_blank" rel="noopener">github.com/Anasss/qa-orchestra/issues</a>.</p>
+  </div>
+</main>
+
+<footer>
+  <span>MIT License</span> &middot; <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">GitHub</a>
+</footer>
+
+</body>
+</html>
