@@ -3,13 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>QA Orchestra — 10 QA Agents for Claude Code</title>
-<meta name="description" content="Open-source multi-agent QA toolkit for Claude Code. 10 specialized agents cover the full QA lifecycle — from diff analysis to bug reports.">
-<meta property="og:title" content="QA Orchestra — 10 QA Agents for Claude Code">
-<meta property="og:description" content="Open-source multi-agent QA toolkit. From diff analysis to bug reports, in Markdown you can paste into GitHub or Jira.">
+<title>QA Orchestra - AI QA Agents for Automated QA Orchestration | Claude Code Plugin</title>
+<meta name="description" content="QA Orchestra: 10 specialized AI QA agents for Claude Code. Automate QA orchestration from diff analysis to bug reports. AI-powered functional review, test scenario design, browser validation, and more. Open-source, stack-agnostic.">
+<meta name="keywords" content="QA orchestration, AI in QA, QA agents, AI QA testing, automated QA, Claude Code plugin, functional review, test scenarios, browser validation, bug reports, acceptance criteria, AI testing tools">
+<meta property="og:title" content="QA Orchestra - AI-Powered QA Orchestration for Claude Code">
+<meta property="og:description" content="10 specialized QA agents that automate the full QA lifecycle. From diff analysis to bug reports, powered by AI.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://qa-orchestra.com">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%8E%BC</text></svg>">
+<meta property="og:image" content="https://qa-orchestra.com/images/qa-orchestra-detective.webp">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="QA Orchestra - AI QA Agents for Automated QA Orchestration">
+<meta name="twitter:description" content="10 specialized QA agents. One question each. One Markdown report each. Open-source Claude Code plugin.">
+<link rel="canonical" href="https://qa-orchestra.com">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%94%8D</text></svg>">
 <style>
 /* ========== RESET & BASE ========== */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
@@ -24,15 +30,16 @@
   --text: #c9d1d9;
   --text-dim: #6e7681;
   --text-bright: #e6edf3;
-  --accent: #06b6d4;
-  --accent-glow: #06b6d420;
-  --accent-bright: #22d3ee;
-  --green: #2dd4a8;
-  --green-dim: #2dd4a830;
+  --accent: #22c55e;
+  --accent-glow: #22c55e20;
+  --accent-bright: #4ade80;
+  --green: #22c55e;
+  --green-dim: #22c55e25;
   --amber: #f59e0b;
   --amber-dim: #f59e0b20;
-  --red: #f87171;
-  --red-dim: #f8717120;
+  --red: #ef4444;
+  --red-dim: #ef444420;
+  --red-bright: #f87171;
   --purple: #a78bfa;
   --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
   --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
@@ -77,7 +84,7 @@ nav .container {
 .nav-logo svg { flex-shrink: 0; }
 .nav-links { display: flex; gap: 28px; align-items: center; }
 .nav-links a {
-  font-size: 13.5px; color: var(--text-dim); transition: color 0.2s;
+  font-size: 13.5px; color: #8b949e; transition: color 0.2s;
   font-weight: 500;
 }
 .nav-links a:hover { color: var(--text-bright); }
@@ -91,15 +98,15 @@ nav .container {
 
 /* ========== HERO ========== */
 .hero {
-  position: relative; padding: 160px 0 100px;
+  position: relative; padding: 140px 0 80px;
   overflow: hidden;
 }
 .hero::before {
   content: '';
   position: absolute; inset: 0;
   background:
-    radial-gradient(ellipse 80% 60% at 50% 0%, #06b6d408 0%, transparent 70%),
-    radial-gradient(ellipse 40% 40% at 20% 50%, #06b6d405 0%, transparent 70%);
+    radial-gradient(ellipse 60% 50% at 30% 30%, #22c55e06 0%, transparent 70%),
+    radial-gradient(ellipse 40% 40% at 70% 60%, #ef444406 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -112,32 +119,24 @@ nav .container {
   position: absolute; inset: -2px;
   background-image: radial-gradient(circle, #1e2d3d 1px, transparent 1px);
   background-size: 32px 32px;
-  mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 20%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 50% 40%, black 20%, transparent 70%);
+  mask-image: radial-gradient(ellipse 70% 50% at 40% 40%, black 20%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 70% 50% at 40% 40%, black 20%, transparent 70%);
 }
 
-/* Scan line */
-.scan-line {
-  position: absolute; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent) 20%, var(--accent) 80%, transparent);
-  opacity: 0.15;
-  animation: scanDown 6s ease-in-out infinite;
-}
-@keyframes scanDown {
-  0%, 100% { top: 20%; opacity: 0; }
-  10% { opacity: 0.15; }
-  90% { opacity: 0.15; }
-  50% { top: 80%; }
+.hero-split {
+  position: relative;
+  display: grid; grid-template-columns: 1fr 400px;
+  gap: 48px; align-items: center;
 }
 
-.hero-content { position: relative; text-align: center; }
+.hero-text { text-align: left; }
 
 .hero-badge {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 16px; border-radius: 100px;
-  background: var(--accent-glow); border: 1px solid #06b6d430;
+  background: var(--accent-glow); border: 1px solid #22c55e30;
   font-family: var(--font-mono); font-size: 12px;
-  color: var(--accent); margin-bottom: 32px;
+  color: var(--accent); margin-bottom: 28px;
   letter-spacing: 0.5px;
 }
 .hero-badge .dot {
@@ -146,25 +145,59 @@ nav .container {
   animation: pulse 2s ease-in-out infinite;
 }
 @keyframes pulse {
-  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 #06b6d460; }
-  50% { opacity: 0.7; box-shadow: 0 0 0 6px #06b6d400; }
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 #22c55e60; }
+  50% { opacity: 0.7; box-shadow: 0 0 0 6px #22c55e00; }
 }
 
 h1 {
-  font-size: clamp(40px, 6vw, 68px);
+  font-size: clamp(36px, 5vw, 58px);
   font-weight: 700; letter-spacing: -2px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
-h1 .accent { color: var(--accent); }
+h1 .red { color: var(--red); }
+
+.bug-definition {
+  border-left: 3px solid var(--red);
+  padding: 14px 20px; margin-bottom: 24px;
+  background: var(--red-dim);
+  border-radius: 0 6px 6px 0;
+}
+.bug-definition p {
+  font-size: 15px; color: var(--text); line-height: 1.6;
+  font-style: italic;
+}
+.bug-definition .detect {
+  color: var(--accent); font-style: normal; font-weight: 600;
+}
 
 .hero-sub {
-  font-size: clamp(16px, 2vw, 19px);
-  color: var(--text-dim); max-width: 600px;
-  margin: 0 auto 40px; line-height: 1.7;
+  font-size: clamp(15px, 1.8vw, 17px);
+  color: var(--text-dim); max-width: 520px;
+  margin-bottom: 20px; line-height: 1.7;
 }
-.hero-sub strong { color: var(--text); font-weight: 500; }
 
-.hero-cta { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
+/* Typewriter */
+.typewriter-line {
+  font-family: var(--font-mono); font-size: 16px;
+  color: var(--accent); margin-bottom: 32px;
+  height: 28px; display: flex; align-items: center; gap: 0;
+}
+.typewriter-prefix {
+  color: var(--text-dim); margin-right: 8px;
+  user-select: none;
+}
+.typewriter-text { white-space: nowrap; }
+.typewriter-cursor {
+  display: inline-block; width: 2px; height: 20px;
+  background: var(--accent); margin-left: 2px;
+  animation: blink 0.8s step-end infinite;
+}
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.hero-cta { display: flex; gap: 14px; flex-wrap: wrap; }
 
 .btn-primary {
   display: inline-flex; align-items: center; gap: 8px;
@@ -184,9 +217,20 @@ h1 .accent { color: var(--accent); }
 }
 .btn-secondary:hover { border-color: var(--border-bright); background: var(--bg-card-hover); transform: translateY(-1px); }
 
+/* Detective image */
+.hero-image {
+  display: flex; justify-content: center; align-items: center;
+}
+.hero-image img {
+  width: 100%; max-width: 400px;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 20px 60px -20px #00000080;
+}
+
 /* Terminal preview under hero */
 .hero-terminal {
-  max-width: 680px; margin: 64px auto 0;
+  max-width: 720px; margin: 64px auto 0;
   border-radius: 10px; overflow: hidden;
   border: 1px solid var(--border);
   background: var(--bg-panel);
@@ -199,9 +243,9 @@ h1 .accent { color: var(--accent); }
   background: #0a0e16; border-bottom: 1px solid var(--border);
 }
 .terminal-dot { width: 10px; height: 10px; border-radius: 50%; }
-.terminal-dot:nth-child(1) { background: #f87171; }
-.terminal-dot:nth-child(2) { background: #f59e0b; }
-.terminal-dot:nth-child(3) { background: #2dd4a8; }
+.terminal-dot:nth-child(1) { background: var(--red); }
+.terminal-dot:nth-child(2) { background: var(--amber); }
+.terminal-dot:nth-child(3) { background: var(--green); }
 .terminal-title {
   flex: 1; text-align: center; font-size: 12px;
   color: var(--text-dim); font-family: var(--font-mono);
@@ -216,7 +260,7 @@ h1 .accent { color: var(--accent); }
 .terminal-body .comment { color: var(--text-dim); }
 .terminal-body .output { color: var(--text-dim); }
 .terminal-body .pass { color: var(--green); }
-.terminal-body .risk { color: var(--amber); }
+.terminal-body .risk { color: var(--red-bright); }
 .terminal-body .file { color: var(--accent); }
 
 /* ========== SECTIONS ========== */
@@ -280,31 +324,6 @@ section { padding: 100px 0; }
 /* ========== HOW IT WORKS ========== */
 .how-section { border-top: 1px solid var(--border); }
 
-.flow-diagram {
-  display: grid; grid-template-columns: 1fr auto 1fr;
-  gap: 32px; align-items: start; margin-top: 16px;
-}
-.flow-col h4 {
-  font-family: var(--font-mono); font-size: 11px; font-weight: 700;
-  color: var(--text-dim); letter-spacing: 1.5px; text-transform: uppercase;
-  margin-bottom: 16px;
-}
-.flow-item {
-  padding: 10px 14px; border-radius: 6px; margin-bottom: 6px;
-  font-family: var(--font-mono); font-size: 13px;
-  border: 1px solid var(--border);
-}
-.flow-input { background: var(--amber-dim); border-color: #f59e0b30; color: var(--amber); }
-.flow-agent { background: var(--bg-card); color: var(--text-bright); }
-.flow-output { background: var(--green-dim); border-color: #2dd4a830; color: var(--green); }
-
-.flow-arrows {
-  display: flex; flex-direction: column; justify-content: center;
-  align-items: center; padding-top: 32px; gap: 0; color: var(--text-dim);
-}
-.flow-arrow { font-size: 20px; line-height: 1; }
-
-/* Simpler output tree for mobile */
 .output-tree {
   background: var(--bg-panel); border: 1px solid var(--border);
   border-radius: 10px; padding: 24px 28px;
@@ -328,7 +347,7 @@ section { padding: 100px 0; }
 }
 .install-card.recommended {
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent), 0 4px 24px -8px #06b6d420;
+  box-shadow: 0 0 0 1px var(--accent), 0 4px 24px -8px #22c55e20;
 }
 .install-label {
   font-family: var(--font-mono); font-size: 11px; font-weight: 700;
@@ -340,8 +359,9 @@ section { padding: 100px 0; }
 .install-card pre {
   background: var(--bg-deep); border: 1px solid var(--border);
   border-radius: 6px; padding: 16px 18px;
-  font-family: var(--font-mono); font-size: 13px;
-  line-height: 1.7; overflow-x: auto; color: var(--text);
+  font-family: var(--font-mono); font-size: 12.5px;
+  line-height: 1.7; overflow-x: hidden; color: var(--text);
+  white-space: pre-wrap; word-break: break-all;
 }
 .install-card pre .cmd-prefix { color: var(--green); user-select: none; }
 
@@ -371,6 +391,46 @@ section { padding: 100px 0; }
   word-break: break-word;
 }
 
+/* ========== FAQ ========== */
+.faq-section { border-top: 1px solid var(--border); }
+
+.faq-list { max-width: 760px; }
+.faq-item {
+  border-bottom: 1px solid var(--border);
+}
+.faq-item:last-child { border-bottom: none; }
+.faq-q {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 20px 0; cursor: pointer;
+  font-size: 16px; font-weight: 600; color: var(--text-bright);
+  -webkit-user-select: none; user-select: none;
+  background: none; border: none; font-family: inherit;
+  text-align: left;
+}
+.faq-q:hover { color: var(--accent); }
+.faq-arrow {
+  font-size: 18px; color: var(--text-dim);
+  transition: transform 0.3s ease;
+  flex-shrink: 0; margin-left: 16px;
+}
+.faq-item.open .faq-arrow { transform: rotate(45deg); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.3s ease;
+  padding: 0 0;
+}
+.faq-item.open .faq-a {
+  max-height: 400px;
+  padding: 0 0 20px;
+}
+.faq-a p {
+  font-size: 14.5px; color: var(--text-dim); line-height: 1.7;
+}
+.faq-a code {
+  background: var(--bg-card); padding: 2px 6px; border-radius: 3px;
+  font-size: 13px; color: var(--accent);
+}
+
 /* ========== FOOTER ========== */
 footer {
   border-top: 1px solid var(--border);
@@ -381,25 +441,35 @@ footer {
   flex-wrap: wrap; gap: 16px;
 }
 .footer-left { display: flex; align-items: center; gap: 20px; }
-.footer-left span { font-size: 13.5px; color: var(--text-dim); }
+.footer-left span { font-size: 13.5px; color: #8b949e; }
 .footer-badge {
   display: inline-flex; align-items: center; gap: 6px;
   padding: 5px 12px; border-radius: 5px;
   background: var(--bg-card); border: 1px solid var(--border);
-  font-family: var(--font-mono); font-size: 11px; color: var(--text-dim);
+  font-family: var(--font-mono); font-size: 11px; color: #8b949e;
 }
 .footer-links { display: flex; gap: 24px; }
-.footer-links a { font-size: 13.5px; color: var(--text-dim); }
+.footer-links a { font-size: 13.5px; color: #8b949e; }
 .footer-links a:hover { color: var(--text-bright); }
 
 /* ========== RESPONSIVE ========== */
+@media (max-width: 868px) {
+  .hero-split {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  .hero-text { text-align: center; }
+  .hero-image { order: -1; }
+  .hero-image img { max-width: 280px; }
+  .hero-cta { justify-content: center; }
+  .typewriter-line { justify-content: center; }
+  .bug-definition { text-align: left; }
+}
 @media (max-width: 768px) {
   .nav-links a:not(.nav-gh) { display: none; }
   .hero { padding: 120px 0 60px; }
   h1 { letter-spacing: -1px; }
   .hero-terminal { margin: 40px auto 0; }
-  .flow-diagram { grid-template-columns: 1fr; }
-  .flow-arrows { flex-direction: row; padding: 0; }
   .install-options { grid-template-columns: 1fr; }
   .recipe-table { font-size: 13px; }
   .recipe-table th, .recipe-table td { padding: 10px 12px; }
@@ -413,6 +483,72 @@ footer {
 }
 .reveal.visible { opacity: 1; transform: translateY(0); }
 </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is QA orchestration?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "QA orchestration is the coordination of multiple QA activities into a structured pipeline. Instead of running a single test suite, QA Orchestra routes your code change through specialized agents - functional review, test scenario design, browser validation, bug reporting - each handling one phase of the QA lifecycle."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How is AI used in QA testing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Each QA agent is an AI-powered specialist running inside Claude Code. The functional reviewer reads your diff against acceptance criteria and identifies gaps. The test scenario designer generates comprehensive test cases. The browser validator navigates your running app via Chrome DevTools MCP and verifies behavior."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What makes QA agents different from regular AI code review?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Regular AI code review gives you one opinion about your code. QA Orchestra gives you 10 specialized agents, each answering a different question. Different questions, different agents, different outputs - all in structured Markdown you can paste into GitHub or Jira."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does QA Orchestra work with any tech stack?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. QA Orchestra is stack-agnostic. It works with React, Angular, Vue, Next.js, Rails, Django, Spring Boot, or any other web framework. All project-specific details live in a single context/CONTEXT.md file."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is QA Orchestra free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "QA Orchestra is open-source under the MIT license. The agents run inside Claude Code, which requires a Claude subscription. No additional API keys, SaaS accounts, or paid services needed."
+      }
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "QA Orchestra",
+  "applicationCategory": "DeveloperApplication",
+  "operatingSystem": "Any",
+  "description": "Open-source AI QA orchestration toolkit with 10 specialized agents for Claude Code. Automates functional review, test scenario design, browser validation, and bug reporting.",
+  "url": "https://qa-orchestra.com",
+  "downloadUrl": "https://github.com/Anasss/qa-orchestra",
+  "license": "https://opensource.org/licenses/MIT",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
 </head>
 <body>
 
@@ -420,9 +556,8 @@ footer {
 <nav>
   <div class="container">
     <a href="#" class="nav-logo">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"/>
-        <circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
       </svg>
       qa-orchestra
     </a>
@@ -430,6 +565,7 @@ footer {
       <a href="#agents">Agents</a>
       <a href="#how">How it works</a>
       <a href="#install">Install</a>
+      <a href="#faq">FAQ</a>
       <a href="https://github.com/Anasss/qa-orchestra" target="_blank" class="nav-gh">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
         GitHub
@@ -438,25 +574,45 @@ footer {
   </div>
 </nav>
 
+<main>
+
 <!-- HERO -->
 <section class="hero">
   <div class="hero-grid"></div>
-  <div class="scan-line"></div>
-  <div class="container hero-content">
-    <div class="hero-badge">
-      <span class="dot"></span>
-      CLAUDE CODE PLUGIN
-    </div>
-    <h1>10 QA agents.<br><span class="accent">Full coverage.</span></h1>
-    <p class="hero-sub">
-      Open-source multi-agent QA toolkit &mdash; from <strong>diff analysis</strong> to <strong>bug reports</strong>, in Markdown you can paste into GitHub or Jira.
-    </p>
-    <div class="hero-cta">
-      <a href="#install" class="btn-primary">Get Started</a>
-      <a href="https://github.com/Anasss/qa-orchestra" target="_blank" class="btn-secondary">
-        <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
-        View on GitHub
-      </a>
+  <div class="container">
+    <div class="hero-split">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span class="dot"></span>
+          CLAUDE CODE PLUGIN
+        </div>
+        <h1>Every PR is a potential<br><span class="red">crime scene.</span></h1>
+
+        <div class="bug-definition">
+          <p>A bug is unexpected behavior born from wrong intent.<br>
+          <span class="detect">These agents find it, prove it, and file the report - before it ships.</span></p>
+        </div>
+
+        <p class="hero-sub">
+          10 specialized QA agents. One question each. One Markdown report each.
+        </p>
+
+        <div class="typewriter-line">
+          <span class="typewriter-prefix">@</span><span class="typewriter-text" id="typewriter"></span><span class="typewriter-cursor"></span>
+        </div>
+
+        <div class="hero-cta">
+          <a href="#install" class="btn-primary">Get Started</a>
+          <a href="https://github.com/Anasss/qa-orchestra" target="_blank" class="btn-secondary">
+            <svg width="18" height="18" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            View on GitHub
+          </a>
+        </div>
+      </div>
+
+      <div class="hero-image">
+        <img src="images/qa-orchestra-detective.webp" alt="QA Orchestra detective investigating code diffs on multiple monitors" />
+      </div>
     </div>
 
     <!-- Terminal preview -->
@@ -474,9 +630,9 @@ footer {
         <br>
         <span class="output">Writing</span> <span class="file">qa-output/functional-review.md</span><br>
         <span class="pass">&nbsp;&nbsp;AC-1: COVERED</span> <span class="output">at src/components/quick-add-button.tsx:43</span><br>
-        <span class="risk">&nbsp;&nbsp;AC-2: AT RISK</span> <span class="output">&mdash; no router.refresh() after server action</span><br>
+        <span class="risk">&nbsp;&nbsp;AC-2: AT RISK</span> <span class="output">- no router.refresh() after server action</span><br>
         <span class="output">&nbsp;&nbsp;2 regression risks in unchanged code paths</span><br>
-        <span class="risk">&nbsp;&nbsp;Verdict: GAPS &mdash; needs browser validation on AC-2</span>
+        <span class="risk">&nbsp;&nbsp;Verdict: GAPS - needs browser validation on AC-2</span>
       </div>
     </div>
   </div>
@@ -496,7 +652,7 @@ footer {
     <div class="tier reveal">
       <div class="tier-header">
         <span class="tier-num">TIER 1</span>
-        <span class="tier-title">Standalone &mdash; start here</span>
+        <span class="tier-title">Standalone - start here</span>
       </div>
       <p class="tier-desc">Daily drivers. Each answers one question, produces one report.</p>
       <div class="agent-grid">
@@ -550,7 +706,7 @@ footer {
         </div>
         <div class="agent-card">
           <div class="agent-name">release-analyzer <span class="model model-opus">OPUS</span></div>
-          <div class="agent-desc">Multi-repo release diff analysis &mdash; cross-repo impact, AC compliance, deployment risks.</div>
+          <div class="agent-desc">Multi-repo release diff analysis - cross-repo impact, AC compliance, deployment risks.</div>
         </div>
         <div class="agent-card">
           <div class="agent-name">automation-writer <span class="model model-sonnet">SONNET</span></div>
@@ -601,7 +757,7 @@ footer {
       <div class="section-label">Install</div>
       <h2 class="section-title">Up and running in 30 seconds</h2>
       <p class="section-desc">
-        Three ways to install. The plugin method is recommended &mdash; all 10 agents load automatically.
+        Three ways to install. The plugin method is recommended - all 10 agents load automatically.
       </p>
     </div>
 
@@ -691,6 +847,63 @@ footer {
   </div>
 </section>
 
+<!-- FAQ -->
+<section class="faq-section" id="faq">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">FAQ</div>
+      <h2 class="section-title">How AI QA orchestration works</h2>
+      <p class="section-desc">
+        Common questions about QA agents, AI-powered testing, and how QA Orchestra fits into your workflow.
+      </p>
+    </div>
+
+    <div class="faq-list reveal">
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">What is QA orchestration?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>QA orchestration is the coordination of multiple QA activities into a structured pipeline. Instead of running a single test suite, QA Orchestra routes your code change through specialized agents - functional review, test scenario design, browser validation, bug reporting - each handling one phase of the QA lifecycle. The output of one agent feeds into the next through <code>qa-output/</code> files.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">How is AI used in QA here?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>Each QA agent is an AI-powered specialist running inside Claude Code. The functional reviewer reads your diff against acceptance criteria and identifies gaps. The test scenario designer generates comprehensive test cases (happy path, negative, boundary, edge). The browser validator navigates your running app via Chrome DevTools MCP and verifies behavior. AI handles the analysis and reasoning; you provide the context in <code>context/CONTEXT.md</code>.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">What makes QA agents different from regular AI code review?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>Regular AI code review gives you one opinion about your code. QA Orchestra gives you 10 specialized agents, each answering a different question. The functional reviewer checks AC compliance. The smart test selector maps your diff to existing tests. The browser validator tests the running app, not just the diff. Each agent writes a structured Markdown report you can paste into GitHub or Jira. Different questions, different agents, different outputs.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">Does it work with my stack?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>Yes. QA Orchestra is stack-agnostic. It works with React, Angular, Vue, Next.js, Rails, Django, Spring Boot, or any other web framework. All project-specific details (URLs, commands, repo paths) live in a single <code>context/CONTEXT.md</code> file. The agents read it before every run and adapt to your stack.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">Do I need to run all 10 agents?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>No. Each agent is standalone. Most users only use Tier 1: <code>@functional-reviewer</code> for PR review, <code>@test-scenario-designer</code> for test planning, or <code>@smart-test-selector</code> to find affected tests. Pick the agent that matches your question. The orchestrator exists for full-pipeline runs, but it's optional.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">How does browser validation work?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>The environment manager checks out your PR branch, installs dependencies, and starts the app locally. The browser validator then connects via Chrome DevTools MCP, navigates to pages, clicks elements, fills forms, and verifies expected behavior - just like a manual QA tester, but automated through AI. This catches issues that static diff analysis misses.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">What do the agents output?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>Every agent writes structured Markdown to the <code>qa-output/</code> directory. Functional reviews, test scenarios, bug reports, validation results - all in Markdown format you can paste directly into GitHub PRs, Jira tickets, or Linear issues. No proprietary formats, no dashboards to learn.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">Is it free?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>QA Orchestra is open-source under the MIT license. The agents run inside Claude Code, which requires a Claude subscription. No additional API keys, SaaS accounts, or paid services needed.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
 <!-- FOOTER -->
 <footer>
   <div class="container footer-inner">
@@ -702,14 +915,59 @@ footer {
       </span>
     </div>
     <div class="footer-links">
-      <a href="https://github.com/Anasss/qa-orchestra" target="_blank">GitHub</a>
-      <a href="https://github.com/Anasss/qa-orchestra/issues" target="_blank">Issues</a>
-      <a href="https://github.com/Anasss/qa-orchestra/blob/main/LICENSE" target="_blank">License</a>
+      <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/Anasss/qa-orchestra/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="https://github.com/Anasss/qa-orchestra/blob/main/LICENSE" target="_blank" rel="noopener">License</a>
     </div>
   </div>
 </footer>
 
 <script>
+// Typewriter
+const agents = [
+  'functional-reviewer',
+  'test-scenario-designer',
+  'browser-validator',
+  'smart-test-selector',
+  'bug-reporter',
+  'environment-manager',
+  'orchestrator',
+  'release-analyzer',
+  'automation-writer',
+  'manual-validator'
+];
+
+const el = document.getElementById('typewriter');
+let agentIdx = 0;
+let charIdx = 0;
+let deleting = false;
+
+function tick() {
+  const current = agents[agentIdx];
+
+  if (!deleting) {
+    el.textContent = current.substring(0, charIdx + 1);
+    charIdx++;
+    if (charIdx === current.length) {
+      setTimeout(() => { deleting = true; tick(); }, 1800);
+      return;
+    }
+    setTimeout(tick, 55);
+  } else {
+    el.textContent = current.substring(0, charIdx);
+    charIdx--;
+    if (charIdx < 0) {
+      deleting = false;
+      charIdx = 0;
+      agentIdx = (agentIdx + 1) % agents.length;
+      setTimeout(tick, 300);
+      return;
+    }
+    setTimeout(tick, 30);
+  }
+}
+tick();
+
 // Scroll reveal
 const reveals = document.querySelectorAll('.reveal');
 const observer = new IntersectionObserver((entries) => {
@@ -721,6 +979,15 @@ const observer = new IntersectionObserver((entries) => {
   });
 }, { threshold: 0.15, rootMargin: '0px 0px -40px 0px' });
 reveals.forEach(el => observer.observe(el));
+
+// FAQ toggle
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const isOpen = item.classList.toggle('open');
+    q.setAttribute('aria-expanded', isOpen);
+  });
+});
 </script>
 
 </body>
