@@ -1,12 +1,14 @@
 {
   "name": "qa-orchestra",
+  "metadata": {
+    "description": "Multi-agent QA toolkit for Claude Code — 10 specialized agents covering the full QA lifecycle from diff analysis to bug reports."
+  },
   "owner": {
     "name": "Anass Rachid",
     "url": "https://github.com/Anasss"
   },
   "plugins": [
     {
-      "id": "qa-orchestra",
       "name": "qa-orchestra",
       "description": "10 coordinated QA agents: functional reviewer, test scenario designer, automation writer, bug reporter, browser validator, and more. Full QA lifecycle from diff analysis to bug reports.",
       "version": "1.0.0",
