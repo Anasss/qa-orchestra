@@ -522,6 +522,14 @@ footer {
     },
     {
       "@type": "Question",
+      "name": "Does QA Orchestra have memory?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Not in the LLM-memory sense - no vector database, no auto-indexed history. QA Orchestra uses a convention: agents append project-specific discoveries to plain Markdown files in context/annotations/. Those files are committed to git, so team learnings compound across engineers and sessions."
+      }
+    },
+    {
+      "@type": "Question",
       "name": "Is QA Orchestra free?",
       "acceptedAnswer": {
         "@type": "Answer",
@@ -565,6 +573,7 @@ footer {
       <a href="#agents">Agents</a>
       <a href="#how">How it works</a>
       <a href="#install">Install</a>
+      <a href="/how-context-works">Docs</a>
       <a href="#faq">FAQ</a>
       <a href="https://github.com/Anasss/qa-orchestra" target="_blank" class="nav-gh">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
@@ -645,7 +654,7 @@ footer {
       <div class="section-label">Agents</div>
       <h2 class="section-title">10 agents, 3 tiers</h2>
       <p class="section-desc">
-        Each agent answers one question, runs independently, and writes a Markdown file. Most users only need Tier 1.
+        Each agent answers one question, runs independently, and writes a Markdown file. Most users only need Tier 1. Need a specialist we don't ship? <a href="/creating-an-agent">Write your own agent</a>.
       </p>
     </div>
 
@@ -757,7 +766,7 @@ footer {
       <div class="section-label">Install</div>
       <h2 class="section-title">Up and running in 30 seconds</h2>
       <p class="section-desc">
-        Three ways to install. The plugin method is recommended - all 10 agents load automatically.
+        Three ways to install. The plugin method is recommended - all 10 agents load automatically. Once installed, fill in your project details: see <a href="/how-context-works">how context works</a>.
       </p>
     </div>
 
@@ -892,6 +901,11 @@ footer {
       <div class="faq-item">
         <button type="button" class="faq-q" aria-expanded="false">What do the agents output?<span class="faq-arrow">+</span></button>
         <div class="faq-a"><p>Every agent writes structured Markdown to the <code>qa-output/</code> directory. Functional reviews, test scenarios, bug reports, validation results - all in Markdown format you can paste directly into GitHub PRs, Jira tickets, or Linear issues. No proprietary formats, no dashboards to learn.</p></div>
+      </div>
+
+      <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">Does QA Orchestra have memory?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>Not in the LLM-memory sense &mdash; no vector database, no auto-indexed history. What it has is a convention: agents append project-specific discoveries to plain Markdown files in <code>context/annotations/</code>. Those files are committed to git, so team learnings compound across engineers and sessions. See <a href="/learning-loop">the learning loop</a> for how it works.</p></div>
       </div>
 
       <div class="faq-item">

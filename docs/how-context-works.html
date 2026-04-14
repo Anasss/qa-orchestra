@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Context Works - QA Orchestra</title>
+<meta name="description" content="How QA Orchestra agents read your project: context injection via @context/CONTEXT.md, the required schema, and which agent reads which section.">
+<link rel="canonical" href="https://qa-orchestra.com/how-context-works">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%94%8D</text></svg>">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #080c14;
+  --bg-panel: #0d1117;
+  --bg-card: #131921;
+  --bg-card-hover: #1a2233;
+  --border: #1e2d3d;
+  --border-bright: #2a3f55;
+  --text: #c9d1d9;
+  --text-dim: #6e7681;
+  --text-bright: #e6edf3;
+  --accent: #22c55e;
+  --accent-glow: #22c55e20;
+  --accent-bright: #4ade80;
+  --amber: #f59e0b;
+  --purple: #a78bfa;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--text-bright); line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+code { font-family: var(--font-mono); font-size: 0.92em; }
+
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #080c14e6;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 600;
+  color: var(--text-bright);
+}
+.nav-logo svg { flex-shrink: 0; }
+nav a.nav-back { font-size: 14px; color: var(--text-dim); }
+nav a.nav-back:hover { color: var(--text-bright); }
+
+/* CONTENT */
+.content { padding: 100px 0 80px; }
+
+.content .eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--accent); letter-spacing: 0.5px;
+  padding: 4px 12px; border-radius: 100px;
+  background: var(--accent-glow); border: 1px solid #22c55e30;
+  margin-bottom: 20px;
+}
+.content h1 { font-size: 36px; letter-spacing: -1px; margin-bottom: 12px; }
+.content .lede { font-size: 17px; color: var(--text-dim); margin-bottom: 40px; max-width: 640px; }
+
+.content h2 {
+  font-size: 22px;
+  margin-top: 56px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.content h3 { font-size: 17px; margin-top: 28px; margin-bottom: 10px; }
+
+.content p { margin-bottom: 16px; font-size: 15.5px; }
+.content ul, .content ol { margin-bottom: 16px; padding-left: 24px; }
+.content li { margin-bottom: 8px; font-size: 15.5px; }
+.content strong { color: var(--text-bright); }
+
+.content code {
+  background: var(--bg-card); padding: 2px 6px; border-radius: 3px;
+  font-size: 13px; color: var(--accent);
+}
+
+pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono); font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+pre code { background: transparent; padding: 0; color: inherit; }
+
+.callout {
+  background: var(--bg-card);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 20px 0 28px;
+}
+.callout.warn { border-left-color: var(--amber); }
+.callout p { margin-bottom: 0; font-size: 14.5px; }
+.callout .label {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent); letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.callout.warn .label { color: var(--amber); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 28px;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+th {
+  color: var(--text-bright);
+  font-weight: 600;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-bright);
+}
+td code {
+  white-space: nowrap;
+}
+
+.diagram {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  margin: 20px 0 28px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.9;
+  overflow-x: auto;
+}
+.diagram .step {
+  display: block;
+  color: var(--text);
+}
+.diagram .arrow { color: var(--text-dim); padding-left: 8px; }
+.diagram .file { color: var(--accent); }
+.diagram .dim { color: var(--text-dim); }
+.diagram .label { color: var(--purple); }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  text-align: center;
+}
+footer span, footer a { font-size: 13px; color: var(--text-dim); }
+footer a:hover { color: var(--text-bright); }
+
+@media (max-width: 720px) {
+  .content h1 { font-size: 28px; }
+  .content h2 { font-size: 19px; }
+  table { font-size: 13px; }
+  th, td { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      qa-orchestra
+    </a>
+    <a href="/" class="nav-back">&larr; Back to home</a>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <span class="eyebrow">DOCS</span>
+    <h1>How context works</h1>
+    <p class="lede">
+      QA Orchestra agents never hardcode your stack. They read one file &mdash; <code>context/CONTEXT.md</code> &mdash; and adapt to whatever is written there. This page explains exactly how that file gets into every agent, what it must contain, and which agent reads which section.
+    </p>
+
+    <h2>The mechanism in one diagram</h2>
+    <div class="diagram">
+      <span class="step"><span class="dim">1.</span> Claude Code starts in the workspace</span>
+      <span class="step"><span class="dim">2.</span> It reads <span class="file">CLAUDE.md</span> (top-level workspace instructions)</span>
+      <span class="step"><span class="dim">3.</span> <span class="file">CLAUDE.md</span> contains one line: <code>@context/CONTEXT.md</code></span>
+      <span class="step"><span class="dim">4.</span> Claude Code treats <code>@path</code> as an include and pulls <span class="file">context/CONTEXT.md</span> into the system prompt</span>
+      <span class="step"><span class="dim">5.</span> You invoke an agent, e.g. <code>@functional-reviewer</code></span>
+      <span class="step"><span class="dim">6.</span> The agent's own prompt (in <span class="file">.claude/agents/functional-reviewer.md</span>) <span class="label">already sees</span> the CONTEXT.md contents &mdash; no extra read needed</span>
+      <span class="step"><span class="dim">7.</span> The agent picks out the section it cares about (URLs, commands, conventions) and starts work</span>
+    </div>
+
+    <div class="callout">
+      <span class="label">KEY POINT</span>
+      <p>This is <strong>static injection at invocation time</strong>, not dynamic retrieval. There is no vector database, no RAG, no embedding search. The file is literally prepended to the agent's prompt. If you want an agent to know something, write it in <code>context/CONTEXT.md</code>.</p>
+    </div>
+
+    <h2>Setting up your CONTEXT.md</h2>
+    <p>
+      Start by copying the example and editing it in place:
+    </p>
+    <pre><span class="dim"># from the qa-orchestra root</span>
+cp examples/CONTEXT.example.md context/CONTEXT.md</pre>
+    <p>
+      Open <code>context/CONTEXT.md</code> in your editor and replace every placeholder with your project's real values. The file is committed to your repo &mdash; your teammates benefit from the same context.
+    </p>
+    <p>
+      The full schema lives at <a href="https://github.com/Anasss/qa-orchestra/blob/main/context/CONTEXT.schema.md" target="_blank" rel="noopener">context/CONTEXT.schema.md</a>. A filled example is at <a href="https://github.com/Anasss/qa-orchestra/blob/main/examples/CONTEXT.example.md" target="_blank" rel="noopener">examples/CONTEXT.example.md</a>.
+    </p>
+
+    <h2>Required sections</h2>
+    <p>
+      These seven sections cover 95% of what agents ask about. The schema is not enforced by a linter &mdash; agents degrade gracefully when a section is missing &mdash; but expect to be asked questions or see skipped steps if you leave something out.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Section</th><th>What goes in it</th><th>Who reads it</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>## Application Under Test</code></td>
+          <td>App name, type, stack, local URLs, test credentials</td>
+          <td>environment-manager, browser-validator, all reviewers</td>
+        </tr>
+        <tr>
+          <td><code>## Repositories</code></td>
+          <td>Table of every repo agents may touch: URL, local path, purpose</td>
+          <td>environment-manager, release-analyzer, functional-reviewer</td>
+        </tr>
+        <tr>
+          <td><code>## Environment Setup</code></td>
+          <td>Shell commands to bring up DB, deps, migrations, seeds, backend, frontend</td>
+          <td>environment-manager</td>
+        </tr>
+        <tr>
+          <td><code>## Health Check</code></td>
+          <td>Per service: terminal URL, content markers, log sentinel</td>
+          <td>environment-manager (required for live validation)</td>
+        </tr>
+        <tr>
+          <td><code>## Automation Framework</code></td>
+          <td>Language, framework, runner, file naming, run command, tags</td>
+          <td>automation-writer, smart-test-selector, manual-validator</td>
+        </tr>
+        <tr>
+          <td><code>## Project Management</code></td>
+          <td>Ticket system, AC format, bug severity scale, branch naming</td>
+          <td>bug-reporter, orchestrator</td>
+        </tr>
+        <tr>
+          <td><code>## Preferences</code></td>
+          <td>Output language, tone, terminology overrides</td>
+          <td>every agent</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>Health Check deserves special care</h3>
+    <p>
+      The <code>## Health Check</code> section decides READY vs NOT READY for the environment-manager. A status code alone is not enough &mdash; a page could return 200 while rendering an error screen. Give three signals per service:
+    </p>
+    <ol>
+      <li><strong>Terminal status URL</strong> &mdash; a URL that, after any redirects, returns 200</li>
+      <li><strong>Content markers</strong> &mdash; strings the response body must contain (a heading, a <code>data-testid</code>, a known JSON field)</li>
+      <li><strong>Log sentinel</strong> &mdash; the log line that means the dev server is actually serving requests</li>
+    </ol>
+    <p>
+      The richer this section, the less the agent has to guess &mdash; and the less likely a false READY verdict poisons downstream steps.
+    </p>
+
+    <h2>Optional sections</h2>
+    <p>
+      Useful when present, skipped silently when absent:
+    </p>
+    <ul>
+      <li><code>## Custom Features</code> &mdash; project-specific endpoints, modules, or capabilities worth naming</li>
+      <li><code>## Products &amp; Categories</code> / <code>## Domain Data</code> &mdash; seed data summary, sample record counts</li>
+      <li><code>## CI/CD</code> &mdash; pipeline, environments, test execution in CI</li>
+      <li><code>## Quality Standards</code> &mdash; definition of done, regression scope, release gates</li>
+      <li><code>## MCP Servers</code> &mdash; project-specific MCP configuration notes</li>
+    </ul>
+
+    <h2>What agents do NOT hardcode</h2>
+    <p>
+      Every agent is written to look up project details from CONTEXT.md, never from inside its own prompt. This is what makes QA Orchestra stack-agnostic. Agents do not assume:
+    </p>
+    <ul>
+      <li><strong>Toolchain</strong> &mdash; npm, pytest, cargo, maven. The run command comes from <em>Automation Framework</em>.</li>
+      <li><strong>Repo layout</strong> &mdash; the paths come from <em>Repositories</em>.</li>
+      <li><strong>Health endpoints</strong> &mdash; URLs and markers come from <em>Health Check</em>.</li>
+      <li><strong>Severity scale</strong> &mdash; Critical / Major / Minor / Trivial is a default, but your <em>Project Management</em> section overrides.</li>
+      <li><strong>Output language</strong> &mdash; English by default, overridden by <em>Preferences</em>.</li>
+    </ul>
+
+    <div class="callout">
+      <span class="label">TIP</span>
+      <p>If you're writing a new agent and it needs something the schema doesn't define, <strong>add it to the schema</strong> as an optional section rather than hardcoding a default. See <a href="creating-an-agent.html">creating a new agent</a> for the full authoring flow.</p>
+    </div>
+
+    <h2>Beyond CONTEXT.md: annotations</h2>
+    <p>
+      CONTEXT.md is for facts you can write down when you set up the project. But agents often discover project-specific behavior <em>during</em> a task &mdash; a service quirk, a test pattern, a business-logic nuance. Those go into <code>context/annotations/</code>, which grows over time as agents hit surprises.
+    </p>
+    <p>
+      Read the <a href="learning-loop.html">learning loop</a> page for how that works &mdash; spoiler: it's a discipline, not an automated memory system.
+    </p>
+
+    <h2>Next</h2>
+    <ul>
+      <li><a href="learning-loop.html">The learning loop</a> &mdash; how agents accumulate project-specific knowledge</li>
+      <li><a href="creating-an-agent.html">Creating a new agent</a> &mdash; add your own specialist to the pipeline</li>
+      <li><a href="https://github.com/Anasss/qa-orchestra/blob/main/context/CONTEXT.schema.md" target="_blank" rel="noopener">CONTEXT.md schema on GitHub</a></li>
+      <li><a href="https://github.com/Anasss/qa-orchestra/blob/main/examples/CONTEXT.example.md" target="_blank" rel="noopener">Filled example on GitHub</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  <span>MIT License</span> &middot; <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">GitHub</a> &middot; <a href="/">Home</a>
+</footer>
+
+</body>
+</html>

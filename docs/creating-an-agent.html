@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Creating a New Agent - QA Orchestra</title>
+<meta name="description" content="How to add a custom QA agent to QA Orchestra. Agent file anatomy, frontmatter rules, required body sections, validation, and testing.">
+<link rel="canonical" href="https://qa-orchestra.com/creating-an-agent">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%94%8D</text></svg>">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #080c14;
+  --bg-panel: #0d1117;
+  --bg-card: #131921;
+  --bg-card-hover: #1a2233;
+  --border: #1e2d3d;
+  --border-bright: #2a3f55;
+  --text: #c9d1d9;
+  --text-dim: #6e7681;
+  --text-bright: #e6edf3;
+  --accent: #22c55e;
+  --accent-glow: #22c55e20;
+  --accent-bright: #4ade80;
+  --amber: #f59e0b;
+  --purple: #a78bfa;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--text-bright); line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+code { font-family: var(--font-mono); font-size: 0.92em; }
+
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #080c14e6;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 600;
+  color: var(--text-bright);
+}
+nav a.nav-back { font-size: 14px; color: var(--text-dim); }
+nav a.nav-back:hover { color: var(--text-bright); }
+
+/* CONTENT */
+.content { padding: 100px 0 80px; }
+
+.content .eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--accent); letter-spacing: 0.5px;
+  padding: 4px 12px; border-radius: 100px;
+  background: var(--accent-glow); border: 1px solid #22c55e30;
+  margin-bottom: 20px;
+}
+.content h1 { font-size: 36px; letter-spacing: -1px; margin-bottom: 12px; }
+.content .lede { font-size: 17px; color: var(--text-dim); margin-bottom: 40px; max-width: 640px; }
+
+.content h2 {
+  font-size: 22px;
+  margin-top: 56px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.content h3 { font-size: 17px; margin-top: 28px; margin-bottom: 10px; }
+
+.content p { margin-bottom: 16px; font-size: 15.5px; }
+.content ul, .content ol { margin-bottom: 16px; padding-left: 24px; }
+.content li { margin-bottom: 8px; font-size: 15.5px; }
+.content strong { color: var(--text-bright); }
+
+.content code {
+  background: var(--bg-card); padding: 2px 6px; border-radius: 3px;
+  font-size: 13px; color: var(--accent);
+}
+
+pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono); font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+pre code { background: transparent; padding: 0; color: inherit; }
+
+.callout {
+  background: var(--bg-card);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 20px 0 28px;
+}
+.callout.warn { border-left-color: var(--amber); }
+.callout p { margin-bottom: 0; font-size: 14.5px; }
+.callout .label {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent); letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.callout.warn .label { color: var(--amber); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 28px;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+th {
+  color: var(--text-bright);
+  font-weight: 600;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-bright);
+}
+td code { white-space: nowrap; }
+
+.checklist {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 24px;
+  margin: 16px 0 28px;
+}
+.checklist ul { list-style: none; padding-left: 0; margin-bottom: 0; }
+.checklist li {
+  padding-left: 28px;
+  position: relative;
+  margin-bottom: 10px;
+  font-size: 14.5px;
+}
+.checklist li::before {
+  content: '';
+  position: absolute; left: 0; top: 6px;
+  width: 14px; height: 14px;
+  border: 1px solid var(--border-bright);
+  border-radius: 3px;
+  background: var(--bg-deep);
+}
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  text-align: center;
+}
+footer span, footer a { font-size: 13px; color: var(--text-dim); }
+footer a:hover { color: var(--text-bright); }
+
+@media (max-width: 720px) {
+  .content h1 { font-size: 28px; }
+  .content h2 { font-size: 19px; }
+  table { font-size: 13px; }
+  th, td { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      qa-orchestra
+    </a>
+    <a href="/" class="nav-back">&larr; Back to home</a>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <span class="eyebrow">DOCS</span>
+    <h1>Creating a new agent</h1>
+    <p class="lede">
+      QA Orchestra ships with 10 agents covering common quality-engineering questions. Your team might need more &mdash; a compliance reviewer for regulated industries, a performance reviewer that knows your SLOs, a security-focused reviewer for sensitive endpoints. Agents are standalone Markdown files. No SDK, no build step, no registration. If you can edit Markdown, you can write an agent.
+    </p>
+
+    <h2>Anatomy of an agent file</h2>
+    <p>
+      Every agent lives at <code>.claude/agents/&lt;agent-name&gt;.md</code> and has two parts: YAML frontmatter and a body.
+    </p>
+
+    <h3>1. YAML frontmatter</h3>
+    <pre><code>---
+name: compliance-reviewer
+description: Compares diffs against regulatory compliance requirements (SOC 2, HIPAA, GDPR) and flags gaps
+model: opus
+tools: Read, Glob, Grep, Bash
+---</code></pre>
+
+    <table>
+      <thead>
+        <tr><th>Field</th><th>Purpose</th><th>Rules</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>name</code></td>
+          <td>Agent identifier, used in <code>@agent-name</code> invocations and the <code>Agent</code> tool's <code>subagent_type</code>.</td>
+          <td><strong>Must exactly match the filename</strong> (without <code>.md</code>). The structural linter enforces this.</td>
+        </tr>
+        <tr>
+          <td><code>description</code></td>
+          <td>One-line summary shown in autocomplete and the Claude Code agent picker.</td>
+          <td>Start with a verb. Be concrete. "Compares diffs against AC" beats "Reviews code".</td>
+        </tr>
+        <tr>
+          <td><code>model</code></td>
+          <td>Which Claude model family the agent runs on.</td>
+          <td><code>sonnet</code>, <code>opus</code>, or <code>haiku</code>. Use <code>opus</code> for heavy reasoning (functional review, release analysis). <code>sonnet</code> for most work. <code>haiku</code> for fast formatting or routing.</td>
+        </tr>
+        <tr>
+          <td><code>tools</code></td>
+          <td>Comma-separated list of tools the agent is allowed to use.</td>
+          <td>Start with <code>Read, Glob, Grep, Bash</code>. Add <code>Write, Edit</code> only if the agent creates or modifies files. Add <code>Agent</code> only if it dispatches to sub-agents.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3>2. The body</h3>
+    <p>
+      Every agent file must have three sections. The structural linter (<code>scripts/validate-agents.mjs</code>) enforces their presence:
+    </p>
+    <ul>
+      <li><strong><code>## Role</code></strong> &mdash; one paragraph describing who the agent is and what they do. Reference <code>context/CONTEXT.md</code> and the <code>context/annotations/</code> directory where relevant. Be explicit about scope: what the agent does <em>not</em> do is often as important as what it does.</li>
+      <li><strong><code>## Output format</code></strong> &mdash; the exact shape of the agent's output. If it writes to <code>qa-output/</code>, describe the file and its top-level structure. If it returns inline results, show a template.</li>
+      <li><strong><code>## Rules</code></strong> &mdash; non-negotiables. What the agent must and must never do. "Never fabricate findings", "always cite file:line", "stop and ask on ambiguity instead of assuming."</li>
+    </ul>
+
+    <p>
+      Most agents also include free-form intermediate sections: <code>## Prerequisites</code>, <code>## Step 1 &mdash; Gather inputs</code>, <code>## Analysis framework</code>, <code>## Severity definitions</code>. These are optional &mdash; add them when "Role + Rules" alone isn't enough scaffolding for a complex task.
+    </p>
+
+    <h3>The trigger block</h3>
+    <p>
+      By convention, every agent body starts with a trigger block right after the H1 heading, stating what the agent reads and what it writes:
+    </p>
+    <pre><code>&gt; **Trigger**: A code diff and compliance rules need to be compared.
+&gt; **Reads**: Diff + `context/CONTEXT.md` + compliance policies.
+&gt; **Writes**: `qa-output/compliance-review.md`</code></pre>
+    <p>
+      The linter does not enforce this, but downstream agents rely on it. The <code>bug-reporter</code> agent knows <code>qa-output/functional-review.md</code> exists because <code>functional-reviewer</code>'s trigger block says it writes there. Keep the convention consistent.
+    </p>
+
+    <h2>The fast path: copy an existing agent</h2>
+    <p>
+      The easiest way to start is to copy the agent whose shape is closest to what you want, then edit.
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>You're building&hellip;</th><th>Start from</th><th>Why</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>A new kind of reviewer (compliance, security, performance)</td>
+          <td><code>functional-reviewer.md</code></td>
+          <td>Already has the AC-vs-diff comparison framework, severity handling, and gap-report structure. Swap Role for your domain.</td>
+        </tr>
+        <tr>
+          <td>A new scenario or test generator</td>
+          <td><code>test-scenario-designer.md</code></td>
+          <td>Already has the happy / negative / boundary / edge coverage framework.</td>
+        </tr>
+        <tr>
+          <td>A routing or planning agent</td>
+          <td><code>orchestrator.md</code></td>
+          <td>Already shows the pattern for reading inputs, deciding what to run, and producing a plan file.</td>
+        </tr>
+        <tr>
+          <td>A browser-driven agent</td>
+          <td><code>browser-validator.md</code></td>
+          <td>Already wired to Chrome MCP with the per-scenario loop and evidence-capture conventions.</td>
+        </tr>
+        <tr>
+          <td>A structured transformer (findings &rarr; reports, scenarios &rarr; tests)</td>
+          <td><code>bug-reporter.md</code> or <code>automation-writer.md</code></td>
+          <td>Already has the "one input = one output" pattern and chaining conventions.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>
+      Copy the file, rename it, update <code>name</code> in the frontmatter to match the new filename, and rewrite <code>## Role</code> for your domain. Keep <code>## Output format</code> and <code>## Rules</code> &mdash; they usually only need small tweaks.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">STYLE NOTE</span>
+      <p>Do not invent new top-level sections just to be different. The linter tolerates extra sections, but contributors and downstream agents appreciate consistency. If you need a new kind of structure, open an issue first and discuss.</p>
+    </div>
+
+    <h2>Validation</h2>
+    <p>
+      Before submitting a new agent, run the structural linter locally:
+    </p>
+    <pre>node scripts/validate-agents.mjs</pre>
+    <p>The linter checks:</p>
+    <ul>
+      <li>YAML frontmatter has <code>name</code>, <code>description</code>, <code>model</code>, <code>tools</code></li>
+      <li>Filename matches the frontmatter <code>name</code></li>
+      <li><code>model</code> is one of <code>sonnet</code>, <code>opus</code>, <code>haiku</code></li>
+      <li>Body has an H1 heading</li>
+      <li>Body has <code>## Role</code>, <code>## Output format</code>, and <code>## Rules</code> sections</li>
+    </ul>
+    <p>
+      Passing the linter means the file is structurally valid. It does <em>not</em> guarantee the agent produces good output &mdash; that's what the reference tests under <code>tests/</code> are for. The same lint runs in CI on every push and PR via <code>.github/workflows/lint.yml</code>.
+    </p>
+
+    <h2>Documenting the agent</h2>
+    <p>After adding the file, update three things:</p>
+    <ol>
+      <li><strong><code>README.md</code></strong> &mdash; add a row to the appropriate tier table.
+        <ul>
+          <li><strong>Tier 1</strong> if the agent is a standalone daily driver (answers one question, runs independently, produces a Markdown file a human can paste into a ticket).</li>
+          <li><strong>Tier 2</strong> if the agent is part of the live-validation chain (needs another agent to have run first, e.g., needs a running app).</li>
+          <li><strong>Tier 3</strong> if the agent is an orchestration or niche supporting agent.</li>
+        </ul>
+      </li>
+      <li><strong><code>CLAUDE.md</code></strong> &mdash; add a row to the agent map with the agent's <em>Reads</em> and <em>Writes</em> contract. This is what downstream agents consult to know the chain.</li>
+      <li><strong><code>AGENTS.md</code></strong> &mdash; only if the agent has cross-agent dependencies worth calling out in the behavioral rules.</li>
+    </ol>
+
+    <h2>Testing your new agent</h2>
+    <p>Add a worked example under <code>tests/&lt;your-agent-name&gt;/</code>:</p>
+    <ul>
+      <li><strong><code>input-*.md</code></strong> &mdash; realistic input(s) the agent will consume. For a reviewer, a sample diff + sample AC. For a generator, a sample AC or finding. Keep it small &mdash; a 10-line diff and a 5-AC ticket usually exercise the interesting paths.</li>
+      <li><strong><code>expected-output.md</code></strong> &mdash; what a "good enough" output looks like. Not a string-match target. A human reading both files should be able to say "yes, this shape is what I'd expect on this input".</li>
+    </ul>
+    <p>
+      See <code>tests/README.md</code> and the existing examples under <code>tests/functional-reviewer/</code> and <code>tests/test-scenario-designer/</code> for the pattern.
+    </p>
+    <div class="callout">
+      <span class="label">WHY THIS PATTERN</span>
+      <p>LLMs aren't deterministic, and string-equality tests on LLM output produce brittle red herrings that break on every run. The reference-example pattern is slower (it needs a human to glance at the diff) but it actually catches regressions in the <em>shape</em> of an agent's answer &mdash; missing sections, missing AC verdicts, missing evidence citations &mdash; which is what usually breaks when someone edits a Role section carelessly.</p>
+    </div>
+
+    <h2>Stack-agnostic design</h2>
+    <p>
+      QA Orchestra agents <strong>never hardcode framework-specific details</strong>. All project-specific commands, URLs, file paths, and conventions come from <code>context/CONTEXT.md</code> (see <a href="how-context-works.html">how context works</a>). When writing a new agent:
+    </p>
+    <ul>
+      <li>Do not hardcode npm, pytest, cargo, or any toolchain. Read the run command from CONTEXT.md's Automation Framework section.</li>
+      <li>Do not hardcode repo names or paths. Read them from the Repositories section.</li>
+      <li>Do not hardcode health-check URLs, content markers, or log sentinels. Read them from Health Check.</li>
+      <li>Do not hardcode severity definitions, AC format, or terminology. Read them from Project Management and Preferences.</li>
+    </ul>
+    <p>
+      If your agent needs something CONTEXT.md doesn't define, <strong>add it to the schema</strong> at <code>context/CONTEXT.schema.md</code> as an optional section, and the user who installs your agent will populate it for their stack.
+    </p>
+
+    <h2>Final checklist</h2>
+    <div class="checklist">
+      <ul>
+        <li>Agent file at <code>.claude/agents/&lt;name&gt;.md</code> with valid YAML frontmatter</li>
+        <li>Body has <code>## Role</code>, <code>## Output format</code>, and <code>## Rules</code> sections</li>
+        <li>Trigger block at the top naming <em>Reads</em> / <em>Writes</em></li>
+        <li><code>node scripts/validate-agents.mjs</code> passes locally</li>
+        <li>Row added to the appropriate tier in <code>README.md</code></li>
+        <li>Row added to the agent map in <code>CLAUDE.md</code></li>
+        <li>Reference example in <code>tests/&lt;name&gt;/</code> with realistic input + expected output</li>
+        <li>Commit message is one line, descriptive, imperative (e.g. <code>feat: add compliance-reviewer agent</code>)</li>
+      </ul>
+    </div>
+    <p>
+      Open a PR against <code>main</code>. CI will run the structural linter automatically. Once it passes and a maintainer approves, your agent is in.
+    </p>
+
+    <h2>Next</h2>
+    <ul>
+      <li><a href="how-context-works.html">How context works</a> &mdash; the CONTEXT.md schema your new agent will read from</li>
+      <li><a href="learning-loop.html">The learning loop</a> &mdash; how your agent should contribute to <code>context/annotations/</code></li>
+      <li><a href="https://github.com/Anasss/qa-orchestra/tree/main/.claude/agents" target="_blank" rel="noopener">Existing agents on GitHub</a> &mdash; read real examples before copying</li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  <span>MIT License</span> &middot; <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">GitHub</a> &middot; <a href="/">Home</a>
+</footer>
+
+</body>
+</html>

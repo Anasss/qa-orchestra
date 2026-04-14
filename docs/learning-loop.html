@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Learning Loop - QA Orchestra</title>
+<meta name="description" content="How QA Orchestra agents accumulate project-specific knowledge over time through the context/annotations directory. A convention, not an automated memory system.">
+<link rel="canonical" href="https://qa-orchestra.com/learning-loop">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%94%8D</text></svg>">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #080c14;
+  --bg-panel: #0d1117;
+  --bg-card: #131921;
+  --bg-card-hover: #1a2233;
+  --border: #1e2d3d;
+  --border-bright: #2a3f55;
+  --text: #c9d1d9;
+  --text-dim: #6e7681;
+  --text-bright: #e6edf3;
+  --accent: #22c55e;
+  --accent-glow: #22c55e20;
+  --accent-bright: #4ade80;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #a78bfa;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--text-bright); line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+code { font-family: var(--font-mono); font-size: 0.92em; }
+
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #080c14e6;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 600;
+  color: var(--text-bright);
+}
+nav a.nav-back { font-size: 14px; color: var(--text-dim); }
+nav a.nav-back:hover { color: var(--text-bright); }
+
+/* CONTENT */
+.content { padding: 100px 0 80px; }
+
+.content .eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--accent); letter-spacing: 0.5px;
+  padding: 4px 12px; border-radius: 100px;
+  background: var(--accent-glow); border: 1px solid #22c55e30;
+  margin-bottom: 20px;
+}
+.content h1 { font-size: 36px; letter-spacing: -1px; margin-bottom: 12px; }
+.content .lede { font-size: 17px; color: var(--text-dim); margin-bottom: 40px; max-width: 640px; }
+
+.content h2 {
+  font-size: 22px;
+  margin-top: 56px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.content h3 { font-size: 17px; margin-top: 28px; margin-bottom: 10px; }
+
+.content p { margin-bottom: 16px; font-size: 15.5px; }
+.content ul, .content ol { margin-bottom: 16px; padding-left: 24px; }
+.content li { margin-bottom: 8px; font-size: 15.5px; }
+.content strong { color: var(--text-bright); }
+
+.content code {
+  background: var(--bg-card); padding: 2px 6px; border-radius: 3px;
+  font-size: 13px; color: var(--accent);
+}
+
+pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono); font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+pre code { background: transparent; padding: 0; color: inherit; }
+
+.callout {
+  background: var(--bg-card);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 20px 0 28px;
+}
+.callout.warn { border-left-color: var(--amber); }
+.callout.bad  { border-left-color: var(--red); }
+.callout p { margin-bottom: 0; font-size: 14.5px; }
+.callout .label {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent); letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.callout.warn .label { color: var(--amber); }
+.callout.bad .label  { color: var(--red); }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 28px;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+th {
+  color: var(--text-bright);
+  font-weight: 600;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-bright);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 16px 0 28px;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.card h4 {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.card p { font-size: 14px; color: var(--text-dim); margin-bottom: 0; }
+
+.do-dont {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0 28px;
+}
+.do-dont > div {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+}
+.do-dont .do    { border-left-color: var(--accent); }
+.do-dont .dont  { border-left-color: var(--red); }
+.do-dont h4 {
+  font-family: var(--font-mono); font-size: 12px;
+  letter-spacing: 0.5px; margin-bottom: 10px;
+}
+.do-dont .do h4   { color: var(--accent); }
+.do-dont .dont h4 { color: var(--red); }
+.do-dont ul { margin-bottom: 0; padding-left: 20px; }
+.do-dont li { font-size: 14px; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  text-align: center;
+}
+footer span, footer a { font-size: 13px; color: var(--text-dim); }
+footer a:hover { color: var(--text-bright); }
+
+@media (max-width: 720px) {
+  .content h1 { font-size: 28px; }
+  .content h2 { font-size: 19px; }
+  .card-grid, .do-dont { grid-template-columns: 1fr; }
+  table { font-size: 13px; }
+  th, td { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      qa-orchestra
+    </a>
+    <a href="/" class="nav-back">&larr; Back to home</a>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <span class="eyebrow">DOCS</span>
+    <h1>The learning loop</h1>
+    <p class="lede">
+      QA Orchestra has no memory system, no vector database, no auto-indexed history. What it has is a discipline: when an agent learns something about your project that wasn't in <code>CONTEXT.md</code>, it writes the finding to a plain Markdown file in <code>context/annotations/</code>. Over time, those files become the project's institutional memory &mdash; and because they live in git, they compound across engineers and sessions.
+    </p>
+
+    <div class="callout warn">
+      <span class="label">CLEARING UP A COMMON QUESTION</span>
+      <p>"Auto-learning" suggests something autonomous. It isn't. There is no scheduler, no hook, no script watching agent output for novel facts. Growth happens because each agent is <strong>prompted to append</strong> its discoveries, and the prompts in <code>AGENTS.md</code> make that a rule. If you never run agents, annotations never grow.</p>
+    </div>
+
+    <h2>The four annotation files</h2>
+    <p>
+      Every QA Orchestra workspace ships with four files under <code>context/annotations/</code>. Each covers one kind of learning.
+    </p>
+
+    <div class="card-grid">
+      <div class="card">
+        <h4>domain.md</h4>
+        <p>Business logic nuances that aren't spelled out in tickets. "Discount applies before tax, not after." "Guest checkout skips the loyalty hook." Domain truths discovered during review.</p>
+      </div>
+      <div class="card">
+        <h4>services.md</h4>
+        <p>Backend service quirks and behaviors. "The cart-service returns 200 with an empty body on stale sessions." "The email queue batches every 30s, not in real time."</p>
+      </div>
+      <div class="card">
+        <h4>environments.md</h4>
+        <p>Environment-specific flakiness and differences. "Port 3000 is used by another service on CI." "Localhost backend needs <code>NODE_TLS_REJECT_UNAUTHORIZED=0</code> for the staging API."</p>
+      </div>
+      <div class="card">
+        <h4>test-patterns.md</h4>
+        <p>Patterns specific to this codebase's test suite. "All interactive elements carry <code>data-testid</code>." "Fixtures live in <code>qa/fixtures</code>, not inline."</p>
+      </div>
+    </div>
+
+    <h2>The required entry format</h2>
+    <p>
+      Every annotation follows the same shape. Agents use it, and so should you when adding entries by hand. The shape is what makes annotations scannable &mdash; a future agent or engineer can skim a file in seconds.
+    </p>
+    <pre><code>### [Date] &mdash; [Topic]
+**Context**: [what task revealed this]
+**Learning**: [what was learned]
+**Impact**: [which agent or scenario this affects]</code></pre>
+
+    <h3>A real example</h3>
+    <pre><code>### 2026-04-07 &mdash; Cart Service
+**Context**: Functional review of PROJ-456 (discount calculation)
+**Learning**: Discount is applied BEFORE tax. AC implied after-tax. Verified in cart-service.ts:142.
+**Impact**: All checkout test scenarios involving discounts must verify pre-tax calculation.</code></pre>
+
+    <p>
+      Three things make this entry useful:
+    </p>
+    <ul>
+      <li><strong>The date</strong> &mdash; lets a reader judge whether the learning is still current.</li>
+      <li><strong>A code citation</strong> &mdash; <code>cart-service.ts:142</code> means the claim can be verified, not just trusted.</li>
+      <li><strong>An impact line</strong> &mdash; tells downstream agents what scenarios need to change.</li>
+    </ul>
+
+    <h2>How an agent's loop actually runs</h2>
+    <ol>
+      <li><strong>Before the task</strong> &mdash; the agent scans <code>context/annotations/</code> for files relevant to its current work. A functional-reviewer working on checkout reads <code>services.md</code> and <code>domain.md</code> if either mentions carts or payments.</li>
+      <li><strong>During the task</strong> &mdash; the agent does its job (reviews the diff, designs scenarios, validates in the browser).</li>
+      <li><strong>After the task</strong> &mdash; the agent asks itself: "did I learn something project-specific that isn't in CONTEXT.md or annotations yet?" If yes, it appends a new entry to the right file using the format above.</li>
+    </ol>
+
+    <p>
+      The per-agent rule lives in <a href="https://github.com/Anasss/qa-orchestra/blob/main/AGENTS.md" target="_blank" rel="noopener">AGENTS.md &sect;7 (Learning loop)</a>. Individual agents like <code>functional-reviewer</code> and <code>manual-validator</code> repeat the instruction in their own files, so the discipline is applied at two levels.
+    </p>
+
+    <h2>Git workflow: why commits matter</h2>
+    <p>
+      Annotations are plain Markdown, tracked in git like everything else. That's not a coincidence &mdash; it's what makes the system work for teams:
+    </p>
+    <ul>
+      <li>A learning captured by one engineer is visible to the whole team on the next <code>git pull</code>.</li>
+      <li>Code review catches hasty or wrong annotations before they mislead future agents.</li>
+      <li><code>git blame</code> on an annotation tells you which task produced it &mdash; useful when the learning turns out to be stale.</li>
+      <li>Reverting a bad annotation is a normal git operation, not a special tool.</li>
+    </ul>
+    <p>
+      Treat annotation changes like code changes. Commit them with a meaningful message ("annotations: cart service discount timing") and review them in PRs.
+    </p>
+
+    <h2>What to write, what to skip</h2>
+    <div class="do-dont">
+      <div class="do">
+        <h4>DO</h4>
+        <ul>
+          <li>Surprises that contradicted an AC or assumption</li>
+          <li>Non-obvious service behaviors with a code citation</li>
+          <li>Environment quirks that caused a flaky result</li>
+          <li>Test-suite conventions you had to infer from reading code</li>
+          <li>Short, scannable entries &mdash; 3-5 lines each</li>
+        </ul>
+      </div>
+      <div class="dont">
+        <h4>DON'T</h4>
+        <ul>
+          <li>Stream-of-consciousness debug notes</li>
+          <li>Facts that already live in <code>CONTEXT.md</code></li>
+          <li>One-off ticket details &mdash; put those in the ticket</li>
+          <li>Long narratives &mdash; a future agent will skim, not read</li>
+          <li>Speculation &mdash; only write what you verified</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="callout bad">
+      <span class="label">ANTI-PATTERN</span>
+      <p>Dumping every discovery into <code>domain.md</code> regardless of category. The four files exist so relevant content is easy to find; if everything ends up in one file, the categorization breaks and agents stop trusting it.</p>
+    </div>
+
+    <h2>Pruning and revising</h2>
+    <p>
+      Annotations don't self-expire. When a service is rewritten, a test convention is dropped, or a business rule changes, the corresponding annotation becomes a lie &mdash; and a worse kind of lie than a missing annotation, because a future agent will act on it.
+    </p>
+    <p>
+      Two habits keep the files honest:
+    </p>
+    <ol>
+      <li><strong>When you change code that matches an annotation</strong>, search <code>context/annotations/</code> in the same PR. Update or delete the matching entry.</li>
+      <li><strong>Review the oldest entries periodically.</strong> Anything older than a few months is worth re-verifying before a reviewer trusts it again.</li>
+    </ol>
+
+    <h2>Annotations vs. CONTEXT.md: where does a fact go?</h2>
+    <table>
+      <thead>
+        <tr><th>If the fact is&hellip;</th><th>It belongs in&hellip;</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>A setup command, URL, credential, or stack detail you can write down up front</td><td><code>context/CONTEXT.md</code></td></tr>
+        <tr><td>A convention that applies to every agent (tone, language, terminology)</td><td><code>context/CONTEXT.md</code> &rarr; Preferences</td></tr>
+        <tr><td>A surprise discovered during a task (service quirk, business rule, test pattern)</td><td>The matching file in <code>context/annotations/</code></td></tr>
+        <tr><td>A one-off detail for a specific ticket</td><td>The ticket itself, not annotations</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Next</h2>
+    <ul>
+      <li><a href="how-context-works.html">How context works</a> &mdash; the CONTEXT.md schema and who reads what</li>
+      <li><a href="creating-an-agent.html">Creating a new agent</a> &mdash; adding a specialist that participates in the learning loop</li>
+      <li><a href="https://github.com/Anasss/qa-orchestra/tree/main/context/annotations" target="_blank" rel="noopener">Annotations folder on GitHub</a></li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  <span>MIT License</span> &middot; <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">GitHub</a> &middot; <a href="/">Home</a>
+</footer>
+
+</body>
+</html>
