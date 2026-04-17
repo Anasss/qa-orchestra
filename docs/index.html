@@ -934,6 +934,11 @@ footer {
       </div>
 
       <div class="faq-item">
+        <button type="button" class="faq-q" aria-expanded="false">Is this only for developers?<span class="faq-arrow">+</span></button>
+        <div class="faq-a"><p>No &mdash; manual testers get the biggest leverage. Reading a diff against acceptance criteria used to be a developer skill; an LLM makes it a tester skill. The <code>functional-reviewer</code> agent tells you in plain language which ACs are implemented, which are missing, and where the edges are &mdash; before you open the browser. Your manual time then goes where it matters most. See <a href="/ai-for-manual-testers">AI for manual testers</a> for the full argument.</p></div>
+      </div>
+
+      <div class="faq-item">
         <button type="button" class="faq-q" aria-expanded="false">How is AI used in QA here?<span class="faq-arrow">+</span></button>
         <div class="faq-a"><p>Each QA agent is an AI-powered specialist running inside Claude Code. The functional reviewer reads your diff against acceptance criteria and identifies gaps. The test scenario designer generates comprehensive test cases (happy path, negative, boundary, edge). The browser validator navigates your running app via Chrome DevTools MCP and verifies behavior. AI handles the analysis and reasoning; you provide the context in <code>context/CONTEXT.md</code>.</p></div>
       </div>

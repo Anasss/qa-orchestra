@@ -29,7 +29,7 @@ Once installed, all 10 agents are available. Type `@functional-reviewer`, `@orch
 <details>
 <summary>What the install looks like in Claude Code</summary>
 
-![QA Orchestra plugin install](docs/images/install-screenshot.png)
+![QA Orchestra plugin install](docs/images/install-screenshot.webp)
 
 </details>
 

@@ -173,6 +173,26 @@ td code {
 .diagram .dim { color: var(--text-dim); }
 .diagram .label { color: var(--purple); }
 
+/* INTRO SPLIT: text left, image right (matches ai-for-manual-testers) */
+.intro-split {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  align-items: center;
+  margin: 0 0 24px;
+}
+.intro-image {
+  display: flex; justify-content: center; align-items: center;
+}
+.intro-image img {
+  display: block;
+  width: 100%; max-width: 340px; height: auto;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 20px 60px -20px #00000080;
+}
+.intro-split .lede { margin-bottom: 0; }
+
 /* FOOTER */
 footer {
   border-top: 1px solid var(--border);
@@ -185,6 +205,9 @@ footer a:hover { color: var(--text-bright); }
 @media (max-width: 720px) {
   .content h1 { font-size: 28px; }
   .content h2 { font-size: 19px; }
+  .intro-split { grid-template-columns: 1fr; gap: 24px; }
+  .intro-image { order: -1; }
+  .intro-image img { max-width: 280px; }
   table { font-size: 13px; }
   th, td { padding: 10px 8px; }
 }
@@ -208,9 +231,21 @@ footer a:hover { color: var(--text-bright); }
   <div class="container">
     <span class="eyebrow">DOCS</span>
     <h1>How context works</h1>
-    <p class="lede">
-      QA Orchestra agents never hardcode your stack. They read one file &mdash; <code>context/CONTEXT.md</code> &mdash; and adapt to whatever is written there. This page explains exactly how that file gets into every agent, what it must contain, and which agent reads which section.
-    </p>
+
+    <div class="intro-split">
+      <p class="lede">
+        QA Orchestra agents never hardcode your stack. They read one file &mdash; <code>context/CONTEXT.md</code> &mdash; and adapt to whatever is written there. This page explains exactly how that file gets into every agent, what it must contain, and which agent reads which section.
+      </p>
+      <div class="intro-image">
+        <img
+          src="images/qa-orchestra-context.webp"
+          alt="A detective studying an illuminated diagram of CLAUDE.md and context.md, with a book of functional specifications open on the desk."
+          width="836"
+          height="721"
+          loading="lazy"
+        />
+      </div>
+    </div>
 
     <h2>The mechanism in one diagram</h2>
     <div class="diagram">

@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI for manual testers: code review without coding - QA Orchestra</title>
+<meta name="description" content="AI now lets a manual tester read the code against the acceptance criteria, without having to be a developer. This page is about what that changes, and what it doesn't.">
+<link rel="canonical" href="https://qa-orchestra.com/ai-for-manual-testers">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='28' font-size='28'>%F0%9F%94%8D</text></svg>">
+<style>
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --bg-deep: #080c14;
+  --bg-panel: #0d1117;
+  --bg-card: #131921;
+  --bg-card-hover: #1a2233;
+  --border: #1e2d3d;
+  --border-bright: #2a3f55;
+  --text: #c9d1d9;
+  --text-dim: #6e7681;
+  --text-bright: #e6edf3;
+  --accent: #22c55e;
+  --accent-glow: #22c55e20;
+  --accent-bright: #4ade80;
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --purple: #a78bfa;
+  --font-body: 'Geist', -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+  --font-mono: 'Geist Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 { color: var(--text-bright); line-height: 1.25; }
+a { color: var(--accent); text-decoration: none; }
+a:hover { color: var(--accent-bright); }
+code { font-family: var(--font-mono); font-size: 0.92em; }
+
+.container { max-width: 880px; margin: 0 auto; padding: 0 24px; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: #080c14e6;
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+}
+nav .nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--font-mono); font-size: 15px; font-weight: 600;
+  color: var(--text-bright);
+}
+nav a.nav-back { font-size: 14px; color: var(--text-dim); }
+nav a.nav-back:hover { color: var(--text-bright); }
+
+/* CONTENT */
+.content { padding: 100px 0 80px; }
+
+.content .eyebrow {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 12px;
+  color: var(--accent); letter-spacing: 0.5px;
+  padding: 4px 12px; border-radius: 100px;
+  background: var(--accent-glow); border: 1px solid #22c55e30;
+  margin-bottom: 20px;
+}
+.content h1 { font-size: 36px; letter-spacing: -1px; margin-bottom: 12px; }
+.content .lede { font-size: 17px; color: var(--text-dim); margin-bottom: 40px; max-width: 640px; }
+
+.content h2 {
+  font-size: 22px;
+  margin-top: 56px;
+  margin-bottom: 16px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+.content h3 { font-size: 17px; margin-top: 28px; margin-bottom: 10px; }
+
+.content p { margin-bottom: 16px; font-size: 15.5px; }
+.content ul, .content ol { margin-bottom: 16px; padding-left: 24px; }
+.content li { margin-bottom: 8px; font-size: 15.5px; }
+.content strong { color: var(--text-bright); }
+
+.content code {
+  background: var(--bg-card); padding: 2px 6px; border-radius: 3px;
+  font-size: 13px; color: var(--accent);
+}
+
+pre {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+  font-family: var(--font-mono); font-size: 13px;
+  line-height: 1.7;
+  color: var(--text);
+}
+pre code { background: transparent; padding: 0; color: inherit; }
+
+.callout {
+  background: var(--bg-card);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+  margin: 20px 0 28px;
+}
+.callout.warn { border-left-color: var(--amber); }
+.callout.bad  { border-left-color: var(--red); }
+.callout p { margin-bottom: 0; font-size: 14.5px; }
+.callout .label {
+  display: inline-block;
+  font-family: var(--font-mono); font-size: 11px;
+  color: var(--accent); letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+.callout.warn .label { color: var(--amber); }
+.callout.bad .label  { color: var(--red); }
+
+/* ANALOGY SPLIT: mirrors homepage .hero-split (text left, image right) */
+.analogy-split {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 40px;
+  align-items: center;
+  margin: 24px 0 36px;
+}
+.analogy-image {
+  display: flex; justify-content: center; align-items: center;
+}
+.analogy-image img {
+  display: block;
+  width: 100%; max-width: 340px; height: auto;
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 20px 60px -20px #00000080;
+}
+
+/* ANALOGY: the centerpiece quote block */
+.analogy {
+  border-left: 3px solid var(--accent);
+  padding: 8px 0 8px 24px;
+  margin: 28px 0 36px;
+  font-size: 18px;
+  line-height: 1.7;
+  color: var(--text-bright);
+}
+.analogy p { margin-bottom: 14px; font-size: 18px; }
+.analogy p:last-child { margin-bottom: 0; }
+.analogy .quote {
+  font-style: italic;
+  color: var(--text);
+  padding-left: 14px;
+  border-left: 2px solid var(--border-bright);
+  display: block;
+}
+.analogy .punch {
+  color: var(--accent-bright);
+  font-weight: 500;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 16px 0 28px;
+  font-size: 14px;
+}
+th, td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+th {
+  color: var(--text-bright);
+  font-weight: 600;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-bright);
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 16px 0 28px;
+}
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 18px 20px;
+}
+.card h4 {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.card p { font-size: 14px; color: var(--text-dim); margin-bottom: 0; }
+
+.do-dont {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin: 16px 0 28px;
+}
+.do-dont > div {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-left-width: 3px;
+  border-radius: 0 8px 8px 0;
+  padding: 16px 20px;
+}
+.do-dont .do    { border-left-color: var(--accent); }
+.do-dont .dont  { border-left-color: var(--red); }
+.do-dont h4 {
+  font-family: var(--font-mono); font-size: 12px;
+  letter-spacing: 0.5px; margin-bottom: 10px;
+}
+.do-dont .do h4   { color: var(--accent); }
+.do-dont .dont h4 { color: var(--red); }
+.do-dont ul { margin-bottom: 0; padding-left: 20px; }
+.do-dont li { font-size: 14px; }
+
+/* FOOTER */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0;
+  text-align: center;
+}
+footer span, footer a { font-size: 13px; color: var(--text-dim); }
+footer a:hover { color: var(--text-bright); }
+
+@media (max-width: 720px) {
+  .content h1 { font-size: 28px; }
+  .content h2 { font-size: 19px; }
+  .analogy, .analogy p { font-size: 16px; }
+  .analogy-split { grid-template-columns: 1fr; gap: 24px; }
+  .analogy-image { order: -1; }
+  .analogy-image img { max-width: 280px; }
+  .card-grid, .do-dont { grid-template-columns: 1fr; }
+  table { font-size: 13px; }
+  th, td { padding: 10px 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+      </svg>
+      qa-orchestra
+    </a>
+    <a href="/" class="nav-back">&larr; Back to home</a>
+  </div>
+</nav>
+
+<main class="content">
+  <div class="container">
+    <span class="eyebrow">FOR MANUAL TESTERS</span>
+    <h1>Opening the hood</h1>
+    <p class="lede">
+      AI now lets a manual tester read the code against the acceptance criteria, without having to be a developer. This page is about what that changes, and what it doesn't.
+    </p>
+
+    <h2>The car in the garage</h2>
+
+    <div class="analogy-split">
+      <div class="analogy">
+        <p>Imagine taking your car for inspection.</p>
+        <p>The mechanic comes back 1 hour later.</p>
+        <p><span class="quote">&ldquo;Your car is good. I drove it. It works.&rdquo;</span></p>
+        <p>You'd say: <strong>did you even open the hood?</strong></p>
+        <p>That's a drive without an inspection. Driving the car is not wrong. A good mechanic always does both, and the drive is what proves the car actually moves.</p>
+        <p class="punch">What's new is this: AI now lets the manual tester do the inspection too, before the car leaves the garage.</p>
+      </div>
+      <div class="analogy-image">
+        <img
+          src="images/qa-orchestra-car-inspection.webp"
+          alt="A detective in a fedora with a magnifying glass, inspecting under the hood of a car in a dim garage."
+          width="836"
+          height="721"
+          loading="lazy"
+        />
+      </div>
+    </div>
+
+    <h2>One thing to get out of the way</h2>
+    <p>
+      Reading the code doesn't replace testing, and it isn't the opposite of manual testing. They are different activities that belong next to each other. Running the feature tells you whether it works. Reading the code tells you whether the developer actually built what was asked. You want both, and until now the second half was usually a developer's job.
+    </p>
+
+    <h2>What a manual tester could never do before</h2>
+    <p>
+      Reading a diff used to be a developer skill. You had to know the codebase, the framework, the idioms. If you were a manual tester, the code was a locked box; you were handed a feature and asked whether it worked.
+    </p>
+    <p>
+      That boundary just moved. An LLM reads the diff, reads the acceptance criteria, and tells you in plain language which ACs have matching code, which don't, and where the edges of the change are. You don't need to parse TypeScript or trace React state. You need to know what the feature is supposed to do, and you already do.
+    </p>
+    <p>
+      That's the whole contribution. Not a new category of testing. A new pathway into something developers have been doing at code review for decades.
+    </p>
+
+    <h2>What a drive alone can't see</h2>
+    <p>
+      A passing manual test is not the same thing as a correct implementation. It only proves the paths you thought to walk.
+    </p>
+    <div class="do-dont">
+      <div class="do">
+        <h4>CODE MATCHES THE SPEC</h4>
+        <ul>
+          <li>Every acceptance criterion has matching code.</li>
+          <li>Edge cases and error paths appear to be handled.</li>
+          <li>Your test drive is a confirmation rather than a discovery.</li>
+        </ul>
+      </div>
+      <div class="dont">
+        <h4>THE HAPPY PATH <em>LOOKS</em> RIGHT</h4>
+        <ul>
+          <li>Your manual pass succeeds.</li>
+          <li>But AC-3 is silently not implemented at all.</li>
+          <li>It ships. The bug arrives six weeks later from production.</li>
+        </ul>
+      </div>
+    </div>
+    <p>
+      Without reading the code, the two cases look the same from the driver's seat. Once you have the report, they don't.
+    </p>
+
+    <h2>Meet the agent that reads the diff</h2>
+    <p>
+      The <a href="https://github.com/Anasss/qa-orchestra/blob/main/.claude/agents/functional-reviewer.md" target="_blank" rel="noopener"><code>functional-reviewer</code></a> answers one question: <strong>does this diff actually implement the AC?</strong>
+    </p>
+    <p>
+      It reads the acceptance criteria and the unified git diff of the branch, then runs five checks. Read them as things the agent <em>looks for</em>, not things it can prove:
+    </p>
+    <div class="card-grid">
+      <div class="card">
+        <h4>coverage</h4>
+        <p>For each AC, is there code in the diff that appears to address it? Or is nothing in the diff pointing at it?</p>
+      </div>
+      <div class="card">
+        <h4>correctness</h4>
+        <p>Does the code look like it does what the AC describes, or does it contradict the spec (wrong keys, inverted conditions, reversed defaults)?</p>
+      </div>
+      <div class="card">
+        <h4>edge cases</h4>
+        <p>Nulls, boundaries, permissions, locale, races. Which ones does the code visibly handle, and which does it silently skip?</p>
+      </div>
+      <div class="card">
+        <h4>side effects</h4>
+        <p>What did the diff touch that the AC never mentioned? The agent sees changes inside the diff; regressions that only show up at runtime still need the drive.</p>
+      </div>
+      <div class="card">
+        <h4>completeness</h4>
+        <p>Validations, error handling, failure paths. Are both happy and sad paths represented in the diff?</p>
+      </div>
+    </div>
+    <div class="callout warn">
+      <span class="label">WHAT THE AGENT IS AND IS NOT</span>
+      <p>Reading the code is not running it. When the agent says an AC has "matching code," that means it looks addressed in the diff, not that the behaviour has been confirmed. The drive still has to prove the feature works.</p>
+    </div>
+    <p>
+      The output is a single report: a verdict (<strong>approve</strong>, <strong>approve with conditions</strong>, or <strong>request changes</strong>), a table showing which ACs have code, and a list of findings pointing at specific files and line ranges.
+    </p>
+
+    <h2>What the output looks like</h2>
+    <p>
+      Here's an excerpt from a review of a dark-mode feature. Five ACs, two with no matching code in the diff. Not visible from the driver's seat, trivial to spot once someone reads the code.
+    </p>
+<pre><code># Functional Review Report
+Ticket: #42 (Add dark mode toggle)
+Risk: 6/10 (rough signal, not a calibrated score)
+
+## AC Coverage
+
+| #    | Acceptance Criterion                          | In diff?       | Code reference           |
+|------|-----------------------------------------------|----------------|--------------------------|
+| AC-1 | Toggle visible in nav header on every page    | Code present   | Header.tsx:10            |
+| AC-2 | Clicking switches mode immediately            | Code present   | DarkModeToggle.tsx:7-11  |
+| AC-3 | Choice persists across sessions (localStorage)| No code found  | (none)                   |
+| AC-4 | data-testid="dark-mode-toggle"                | Code present   | DarkModeToggle.tsx:16    |
+| AC-5 | Default matches prefers-color-scheme          | No code found  | (none)                   |
+
+## Findings
+
+- AC-3: No localStorage read/write anywhere in the diff; theme state will reset on reload.
+- AC-5: useState(false) hardcodes initial value; no prefers-color-scheme check on first visit.
+
+Verdict: Request changes. Two of five ACs have no matching code.
+("Code present" means the code looks like it addresses the AC. It does
+not mean the behaviour has been confirmed. The drive does that.)</code></pre>
+    <p>
+      A manual tester can drive this car all day and the happy path passes: the toggle clicks, the theme flips. AC-3 only surfaces if you happen to close the tab and reopen it. AC-5 only fails on a machine with a system preference you don't use. The report caught both without touching the browser. The drive still has to confirm that AC-1, AC-2, and AC-4 behave the way the code suggests.
+    </p>
+
+    <h2>What the agent can't do</h2>
+    <p>
+      If you stop reading here, you will overrate what the agent is doing. A fair picture has to name four places it can fail you.
+    </p>
+
+    <h3>1. Garbage AC in, garbage verdict out</h3>
+    <p>
+      The whole pipeline assumes clean, unambiguous, testable acceptance criteria. Most real backlogs do not have those. An AC that says "the feature should feel snappy" gives the agent nothing concrete to check code against. The quality of the review is capped by the quality of the spec. If an AC is vague, fix the AC before trusting the report.
+    </p>
+
+    <h3>2. LLMs hallucinate file references</h3>
+    <p>
+      Language models fabricate paths and line numbers with confidence. A report that says <code>DarkModeToggle.tsx:16</code> is only trustworthy if the agent actually looked at the file and the reference is checked against the real diff before being shown. Treat any citation the agent gives you as a claim to verify, not a fact to quote. Its job is to narrow your search, not to end it.
+    </p>
+
+    <h3>3. The risk score is a rough signal</h3>
+    <p>
+      A number like "6/10" looks like a measurement. It isn't. There's no explicit rubric behind it. Read it as a rough ordering between tickets, not as a calibrated probability. If it ever gets used to gate merges, the methodology needs to be written down first, or it will erode trust the first time a low score ships a bad bug.
+    </p>
+
+    <h3>4. Nothing checks the reviewer</h3>
+    <p>
+      In this pipeline every agent feeds forward. Nothing currently re-reads the reviewer's verdict with a different model or a different prompt to push back on it. Until that exists, <em>you</em> are the check. Read each "approve" as one reviewer's proposal, not as a consensus.
+    </p>
+
+    <h2>You still drive the car</h2>
+    <p>
+      The report tells you what the code <em>claims</em> to do. Only running it, either yourself or through the <a href="https://github.com/Anasss/qa-orchestra/blob/main/.claude/agents/browser-validator.md" target="_blank" rel="noopener"><code>browser-validator</code></a>, shows you what it <em>does</em> when a real browser, a real network, and a real user hit it. Reading the code narrows the search; running it is still where the behaviour gets confirmed.
+    </p>
+    <div class="callout">
+      <span class="label">THE TWO HALVES</span>
+      <p><strong>Reading the code is the inspection. Running it is the drive. You need both.</strong> One tells you whether the engine was built according to the spec; the other tells you whether the car actually moves on the road.</p>
+    </div>
+    <p>
+      The win is that you now walk into the drive knowing which ACs are suspect, which edges to probe, and where the developer's attention ran out. Your manual time goes where it's most valuable: on the scenarios no amount of reading the diff can prove on its own, including the regressions and integration surprises that only show up at runtime.
+    </p>
+
+    <h3>Nothing here replaces your judgment</h3>
+    <p>
+      Every agent in this workflow is a specialist working <em>under you</em>, not above you. The reviewer proposes a verdict; you decide whether its findings are fair and push back when they aren't. The test scenario designer drafts cases; you prune what doesn't matter for this release and add what it missed.
+    </p>
+    <p>
+      Even the <code>browser-validator</code>, the agent built to <em>do the driving</em>, is not a box you hand the keys to and walk away from. Think of it as autonomous driving: the car can steer, but you are still in the car. You watch the dashboard, see what it opened, which elements it clicked, which assertions it ran. You read the report it produced, you ask why it skipped a step, and you intervene when its interpretation of a scenario is wrong.
+    </p>
+    <div class="callout warn">
+      <span class="label">THE HUMAN STAYS IN THE LOOP</span>
+      <p>Agents propose. You decide. A verdict that says <em>"approve"</em> is an input to your judgment, not a substitute for it. The value of this workflow is that it hands you better material to judge with, not that it removes you from the judging.</p>
+    </div>
+
+    <h2>A manual tester's new day</h2>
+    <p>
+      Before the change:
+    </p>
+    <ol>
+      <li>Open the ticket.</li>
+      <li>Open the app.</li>
+      <li>Try to cover every AC from the outside, with no idea which ones the developer actually touched.</li>
+      <li>File bugs when something breaks.</li>
+    </ol>
+    <p>
+      After the change:
+    </p>
+    <ol>
+      <li>Open the ticket.</li>
+      <li>Read a one-page report: three ACs have matching code, one looks partial, one has no code at all. Two edge cases flagged.</li>
+      <li>Sanity-check the file references the agent cited.</li>
+      <li>Open the app. Spend your time on the partial AC, the missing one, the flagged edges, and the regressions the diff can't prove on its own.</li>
+      <li>File bugs, starting from the agent's references and confirmed by you.</li>
+    </ol>
+    <p>
+      Less busywork, more judgment work. That's the shift.
+    </p>
+
+    <h2>Where this fits in the workflow</h2>
+    <p>
+      Here's the full pipeline. Each agent does one thing and hands its output to the next:
+    </p>
+<pre><code>environment-manager        check out the branch, start the app
+    ↓
+functional-reviewer        read the diff, compare it to the ACs
+test-scenario-designer     draft the scenarios to run
+    ↓
+browser-validator          drive the car, verify against the UI
+    ↓
+bug-reporter               turn findings into developer-ready tickets</code></pre>
+    <p>
+      The inspection comes first. The drive comes second. The report comes third. That's the order a good mechanic would use, and now the order a good QA team can too.
+    </p>
+
+    <h2>Next</h2>
+    <ul>
+      <li><a href="how-context-works.html">How context works</a>: what the agent knows about your project before it reads the diff</li>
+      <li><a href="learning-loop.html">The learning loop</a>: how findings from one review inform the next</li>
+      <li><a href="https://github.com/Anasss/qa-orchestra/blob/main/.claude/agents/functional-reviewer.md" target="_blank" rel="noopener">functional-reviewer on GitHub</a>: the agent's full prompt and output contract</li>
+    </ul>
+  </div>
+</main>
+
+<footer>
+  <span>MIT License</span> &middot; <a href="https://github.com/Anasss/qa-orchestra" target="_blank" rel="noopener">GitHub</a> &middot; <a href="/">Home</a>
+</footer>
+
+</body>
+</html>
