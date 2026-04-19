@@ -1,7 +1,26 @@
 # AGENTS.md — QA Orchestra Behavioral Instructions
 
 This file defines how AI agents must behave in this project.
-It applies to Claude Code, Copilot, Cursor, and any agent reading this workspace.
+
+**Primary support: Claude Code.** Best-effort: any agent runtime that honors AGENTS.md and reads Markdown instructions. Tool names in agent frontmatter (Agent, Bash, etc.) are Claude Code conventions; other runtimes may need a tool-mapping layer before the agents work correctly.
+
+---
+
+## 0. Mandatory skill check (read this first)
+
+Before responding to any QA-adjacent request, state which `qa-orchestra` agent applies. If one does, invoke it. If none does, say so explicitly and only then proceed with inline reasoning. Do not silently do QA-style work (gap analysis, scenario design, test selection, bug writing) without first naming the agent that owns that work — this is how specialist agents get forgotten and the discipline drifts.
+
+Quick map:
+- *"Does this diff implement the AC?"* → `functional-reviewer`
+- *"What scenarios do I need?"* → `test-scenario-designer`
+- *"Which tests will this change break?"* → `smart-test-selector`
+- *"File this as a bug."* → `bug-reporter`
+- *"Check the app in a browser."* → `browser-validator`
+- *"Set up the PR branch locally."* → `environment-manager`
+- *"Write Playwright/Cypress tests for these scenarios."* → `automation-writer`
+- *"Walk me through manual test execution."* → `manual-validator`
+- *"Analyze this release across repos."* → `release-analyzer`
+- *"Coordinate the full QA pipeline."* → `orchestrator`
 
 ---
 
@@ -30,7 +49,8 @@ If the user says the app is already running from the feature branch, skip the en
 ## 3. Output discipline
 
 - **Always save output to the correct file in `qa-output/`** (see CLAUDE.md agent map).
-- Output format is structured Markdown, copy-pasteable into GitHub Issues / Jira / Linear.
+- Output format is **a ```json qa-orchestra``` machine block at the top**, then structured Markdown below — see each agent's `## Output format` section for the required fields. Schema at `schemas/qa-output.schema.json`, validator at `scripts/validate-qa-output.mjs`.
+- The Markdown below the block stays copy-pasteable into GitHub Issues / Jira / Linear. The machine block and the prose must not contradict each other.
 - Never truncate output. If content is long, split into sections but deliver completely.
 - If you cannot produce a complete output (missing input), **stop and ask** — do not fabricate.
 - Screenshots from browser validation go to `qa-output/screenshots/`.
@@ -52,6 +72,8 @@ manual-validator    → reads test-scenarios.md
 ```
 
 Never redo upstream work. Trust the file.
+
+**When reading an upstream file, parse its ```json qa-orchestra``` block — not the prose.** The prose is for humans; LLM-on-LLM prose parsing is brittle. If the block is missing or fails to parse, stop and report rather than falling back to regex.
 
 ---
 

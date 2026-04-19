@@ -21,3 +21,15 @@ jobs:
 
       - name: Validate agent structure
         run: node scripts/validate-agents.mjs
+
+      - name: Validate qa-output machine blocks (golden fixtures, strict)
+        run: node scripts/validate-qa-output.mjs --all --strict
+
+      - name: Validate envelope-violation fixture is rejected
+        run: node scripts/validate-qa-output.mjs --expect-fail tests/_invalid/expected-output.md
+
+      - name: Validate strict-extension fixture passes envelope-only
+        run: node scripts/validate-qa-output.mjs tests/_invalid/strict-extension.md
+
+      - name: Validate strict-extension fixture is rejected by --strict
+        run: node scripts/validate-qa-output.mjs --expect-fail --strict tests/_invalid/strict-extension.md

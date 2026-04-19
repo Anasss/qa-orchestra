@@ -1,3 +1,33 @@
+```json qa-orchestra
+{
+  "agent": "functional-reviewer",
+  "version": 1,
+  "verdict": "fail",
+  "summary": "2 of 5 ACs missing (AC-3 persistence, AC-5 system-preference default). Ready for QA after those two are closed.",
+  "inputs": [
+    { "kind": "ac", "ref": "ticket #42 — Add dark mode toggle" },
+    { "kind": "diff", "ref": "main...feature/dark-mode" }
+  ],
+  "risk_score": 6,
+  "ac_compliance": [
+    { "id": "AC-1", "status": "covered", "file_ref": "Header.tsx:10" },
+    { "id": "AC-2", "status": "covered", "file_ref": "DarkModeToggle.tsx:7-11" },
+    { "id": "AC-3", "status": "missing", "file_ref": null },
+    { "id": "AC-4", "status": "covered", "file_ref": "DarkModeToggle.tsx:16" },
+    { "id": "AC-5", "status": "missing", "file_ref": null }
+  ],
+  "gaps": [
+    { "ac": "AC-3", "desc": "No localStorage read/write; theme resets on reload." },
+    { "ac": "AC-5", "desc": "useState(false) ignores prefers-color-scheme." }
+  ],
+  "regression_risk": "low",
+  "next_actions": [
+    "bug-reporter: file bugs for AC-3 and AC-5",
+    "developer: close both ACs in one follow-up (shared init surface)"
+  ]
+}
+```
+
 Ticket: #42 — Add dark mode toggle
 
 # Functional Review Report

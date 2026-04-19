@@ -1,3 +1,36 @@
+```json qa-orchestra
+{
+  "agent": "test-scenario-designer",
+  "version": 1,
+  "verdict": "pass",
+  "summary": "15 scenarios across 5 ACs: 8 must_test, 4 should_test, 3 nice_to_have.",
+  "inputs": [
+    { "kind": "ac", "ref": "ticket #87 — Email validation on signup form" }
+  ],
+  "scenarios": [
+    { "id": "TC-01", "type": "negative", "priority": "must_test",    "title": "Submitting signup form with empty email shows required-field error" },
+    { "id": "TC-02", "type": "edge",     "priority": "must_test",    "title": "Blurring empty email field after focus shows required-field error" },
+    { "id": "TC-03", "type": "negative", "priority": "must_test",    "title": "Email missing @ shows validation error" },
+    { "id": "TC-04", "type": "negative", "priority": "must_test",    "title": "Email missing domain shows validation error" },
+    { "id": "TC-05", "type": "negative", "priority": "must_test",    "title": "Email missing local part shows validation error" },
+    { "id": "TC-06", "type": "boundary", "priority": "should_test",  "title": "Email with multiple @ signs shows validation error" },
+    { "id": "TC-07", "type": "boundary", "priority": "nice_to_have", "title": "Very long email exceeding RFC 5321 limit (254 characters)" },
+    { "id": "TC-08", "type": "negative", "priority": "must_test",    "title": "Signup with email already in database shows duplicate error" },
+    { "id": "TC-09", "type": "boundary", "priority": "must_test",    "title": "Case-insensitive duplicate check" },
+    { "id": "TC-10", "type": "edge",     "priority": "should_test",  "title": "Duplicate check hits the database, not a client-side cache" },
+    { "id": "TC-11", "type": "edge",     "priority": "must_test",    "title": "Invalid email shown on blur before any submit attempt" },
+    { "id": "TC-12", "type": "edge",     "priority": "must_test",    "title": "Fixing an invalid email clears the error on next blur" },
+    { "id": "TC-13", "type": "happy",    "priority": "must_test",    "title": "Happy path — valid email submits successfully" },
+    { "id": "TC-14", "type": "boundary", "priority": "should_test",  "title": "Email with plus-tag is accepted (e.g., user+tag@example.com)" },
+    { "id": "TC-15", "type": "boundary", "priority": "nice_to_have", "title": "Email with subdomain is accepted (e.g., user@mail.example.com)" }
+  ],
+  "next_actions": [
+    "automation-writer: generate Playwright for must_test scenarios",
+    "browser-validator: run must_test scenarios against staging"
+  ]
+}
+```
+
 Ticket: #87 — Email validation on signup form
 
 # Test Scenarios

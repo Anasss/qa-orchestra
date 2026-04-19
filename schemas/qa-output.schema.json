@@ -1,0 +1,196 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://qa-orchestra.com/schemas/qa-output.schema.json",
+  "title": "QA Orchestra machine block",
+  "description": "Schema for the ```json qa-orchestra fenced block that every agent must emit at the top of its qa-output/*.md report. Downstream agents read this block as source of truth; the prose below it is for humans. Kept deliberately shallow — strings for file references, not nested objects.",
+  "type": "object",
+  "required": ["agent", "version", "verdict", "summary"],
+  "additionalProperties": true,
+  "properties": {
+    "agent": {
+      "type": "string",
+      "enum": [
+        "orchestrator",
+        "environment-manager",
+        "functional-reviewer",
+        "test-scenario-designer",
+        "browser-validator",
+        "automation-writer",
+        "bug-reporter",
+        "manual-validator",
+        "release-analyzer",
+        "smart-test-selector"
+      ]
+    },
+    "version": { "const": 1 },
+    "timestamp": {
+      "type": "string",
+      "description": "ISO-8601 UTC timestamp. Optional — omit if the agent cannot observe wall-clock reliably."
+    },
+    "inputs": {
+      "type": "array",
+      "description": "Provenance — what the agent read. Each entry is a short {kind, ref} pair.",
+      "items": {
+        "type": "object",
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": { "type": "string" },
+          "ref": { "type": "string" }
+        }
+      }
+    },
+    "verdict": {
+      "type": "string",
+      "enum": ["pass", "pass_with_conditions", "fail", "not_applicable", "blocked"]
+    },
+    "summary": {
+      "type": "string",
+      "maxLength": 280,
+      "description": "One-line human-readable summary. Must be consistent with the prose verdict below."
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "agent_extensions": {
+      "description": "Per-agent fields. Each agent SHOULD include its own extension, but unknown fields are allowed (additionalProperties: true) so agents can evolve without breaking the validator.",
+      "functional-reviewer": {
+        "risk_score": { "type": "integer", "minimum": 1, "maximum": 10 },
+        "ac_compliance": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "status"],
+            "properties": {
+              "id": { "type": "string" },
+              "status": { "enum": ["covered", "partial", "missing", "ambiguous"] },
+              "file_ref": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "gaps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "ac": { "type": "string" },
+              "desc": { "type": "string" }
+            }
+          }
+        },
+        "regression_risk": { "enum": ["low", "medium", "high"] }
+      },
+      "test-scenario-designer": {
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "type"],
+            "properties": {
+              "id": { "type": "string" },
+              "type": { "enum": ["happy", "negative", "boundary", "edge"] },
+              "priority": { "enum": ["must_test", "should_test", "nice_to_have"] },
+              "title": { "type": "string" }
+            }
+          }
+        }
+      },
+      "browser-validator": {
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "status"],
+            "properties": {
+              "id": { "type": "string" },
+              "status": { "enum": ["pass", "fail", "skipped", "blocked"] },
+              "evidence_path": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "screenshots": { "type": "array", "items": { "type": "string" } }
+      },
+      "bug-reporter": {
+        "bugs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "severity"],
+            "properties": {
+              "id": { "type": "string" },
+              "severity": { "enum": ["critical", "major", "minor", "trivial"] },
+              "ac_ref": { "type": ["string", "null"] },
+              "file_ref": { "type": ["string", "null"] },
+              "title": { "type": "string" }
+            }
+          }
+        }
+      },
+      "smart-test-selector": {
+        "affected_tests": { "type": "array", "items": { "type": "string" } },
+        "coverage_gaps": { "type": "array", "items": { "type": "string" } }
+      },
+      "environment-manager": {
+        "ready": { "type": "boolean" },
+        "services": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "status"],
+            "properties": {
+              "name": { "type": "string" },
+              "url": { "type": ["string", "null"] },
+              "status": { "enum": ["up", "down", "degraded", "unknown"] }
+            }
+          }
+        }
+      },
+      "automation-writer": {
+        "generated_files": { "type": "array", "items": { "type": "string" } }
+      },
+      "manual-validator": {
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "status"],
+            "properties": {
+              "id": { "type": "string" },
+              "status": { "enum": ["pass", "fail", "skipped"] },
+              "tester_note": { "type": ["string", "null"] }
+            }
+          }
+        }
+      },
+      "release-analyzer": {
+        "repos": { "type": "array", "items": { "type": "string" } },
+        "deployment_risks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "risk": { "type": "string" },
+              "severity": { "enum": ["low", "medium", "high"] }
+            }
+          }
+        }
+      },
+      "orchestrator": {
+        "steps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["agent", "status"],
+            "properties": {
+              "agent": { "type": "string" },
+              "status": { "enum": ["pending", "running", "done", "skipped", "failed"] },
+              "output_ref": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}
