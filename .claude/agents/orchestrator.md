@@ -82,7 +82,61 @@ The full pipeline follows this sequence:
 - Skip `browser-validation` if Chrome MCP is not available (note it in the plan)
 - Skip `bug-reporter` if no gaps found in functional review AND browser validation
 
+## Step 4 — Dispatch the plan
+
+After writing `qa-output/plan.md`, your behavior depends on what the user asked for:
+
+- **"Plan the pipeline" / "What's the QA plan?"** → stop after writing plan.md. Let the user invoke agents manually.
+- **"Run the full QA pipeline" / "Execute the plan" / "Test this PR"** → proceed to dispatch step 2.
+
+### Dispatching step 2 in parallel
+
+The step-2 pair (`functional-reviewer` + `test-scenario-designer`) **MUST be invoked in parallel** — both only need acceptance criteria and neither depends on the other's output.
+
+Use the `Agent` tool with **two tool calls in a single response**. Do not invoke them sequentially. Each subagent runs with its own fresh context window; they do not inherit yours. This is what AGENTS.md §5 requires.
+
+After both subagents complete:
+1. Read `qa-output/functional-review.md` and `qa-output/test-scenarios.md`.
+2. Update `steps[].status` in the machine block at `qa-output/plan.md` to reflect which steps are `done` vs `failed` vs still `pending`.
+3. Summarise the outputs in one paragraph (key gaps found, scenarios generated).
+4. Propose the next step: `browser-validation` if Chrome MCP is available, otherwise manual review.
+
+### Do NOT dispatch beyond step 2
+
+Later steps (`browser-validation`, `bug-reporter`, `automation-writer`) either depend on external infrastructure (Chrome MCP) or benefit from human review before proceeding. Write the plan, dispatch step 2, report outputs, and let the user decide whether to continue.
+
+### Dispatch failures
+
+If a subagent fails or returns a `fail` verdict:
+- Do not retry automatically.
+- Update `steps[].status` to `failed`, set the orchestrator's top-level `verdict` to `blocked`.
+- Report the failure and stop.
+
 ## Output format
+
+### Machine block (required, first in file)
+
+Before the prose, emit this fenced block verbatim. The `steps[]` array is the machine-readable audit trail for the chain.
+
+````
+```json qa-orchestra
+{
+  "agent": "orchestrator",
+  "version": 1,
+  "verdict": "pass | pass_with_conditions | fail | blocked",
+  "summary": "<=280 chars — e.g. \"Plan: 5 steps; env ready; 2 gaps; bugs filed\"",
+  "inputs": [ { "kind": "ticket", "ref": "ID or free-form brief" } ],
+  "steps": [
+    { "agent": "environment-manager", "status": "done | pending | running | skipped | failed", "output_ref": "qa-output/environment-status.md" }
+  ],
+  "next_actions": ["user: review qa-output/bug-reports.md"]
+}
+```
+````
+
+Update `steps[].status` as the chain progresses. If a critical step fails, stop and set the top-level `verdict: blocked`.
+
+### Prose report
 
 Save to `qa-output/plan.md`.
 
