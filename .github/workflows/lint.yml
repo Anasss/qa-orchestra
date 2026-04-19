@@ -33,3 +33,9 @@ jobs:
 
       - name: Validate strict-extension fixture is rejected by --strict
         run: node scripts/validate-qa-output.mjs --expect-fail --strict tests/_invalid/strict-extension.md
+
+      - name: Eval checker accepts golden functional-reviewer output
+        run: node scripts/evals/functional-reviewer.mjs tests/functional-reviewer/expected-output.md
+
+      - name: Eval checker rejects missed-gaps fixture
+        run: node scripts/evals/functional-reviewer.mjs --expect-fail tests/functional-reviewer/eval-fixtures/missed-gaps.md
