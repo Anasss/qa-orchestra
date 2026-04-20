@@ -22,8 +22,8 @@ jobs:
       - name: Validate agent structure
         run: node scripts/validate-agents.mjs
 
-      - name: Validate qa-output machine blocks (golden fixtures, strict)
-        run: node scripts/validate-qa-output.mjs --all --strict
+      - name: Validate qa-output machine blocks (golden fixtures, strict + coherence)
+        run: node scripts/validate-qa-output.mjs --all --strict --coherence
 
       - name: Validate envelope-violation fixture is rejected
         run: node scripts/validate-qa-output.mjs --expect-fail tests/_invalid/expected-output.md
@@ -33,6 +33,12 @@ jobs:
 
       - name: Validate strict-extension fixture is rejected by --strict
         run: node scripts/validate-qa-output.mjs --expect-fail --strict tests/_invalid/strict-extension.md
+
+      - name: Validate coherence-drift fixture passes envelope-only (proves --coherence adds value)
+        run: node scripts/validate-qa-output.mjs tests/_invalid/coherence-drift.md
+
+      - name: Validate coherence-drift fixture is rejected by --coherence
+        run: node scripts/validate-qa-output.mjs --expect-fail --coherence tests/_invalid/coherence-drift.md
 
       - name: Eval checker accepts golden functional-reviewer output
         run: node scripts/evals/functional-reviewer.mjs tests/functional-reviewer/expected-output.md
